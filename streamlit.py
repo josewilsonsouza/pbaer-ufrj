@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib import pyplot as plt
 
 # Título do aplicativo
 st.title('Análise de Dados com Streamlit')
