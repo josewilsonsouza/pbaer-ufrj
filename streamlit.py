@@ -14,9 +14,6 @@ data = data.loc[data.CO_CURSO==14324].copy()
 st.write("Visualização dos dados:")
 st.write(data)
 
-# Selecionar uma coluna específica para criar o gráfico
-column = st.selectbox("Evasao:", data.columns)
-
 # Criar um gráfico simples (contagem de valores)
 st.write("Gráfico de Dispersão entre 'Evasao' e 'Ano':")
 
@@ -24,5 +21,5 @@ fig, ax = plt.subplots()
 ax.scatter(data['CO_ANO'], data['Evasao'])
 ax.set_xlabel('Ano')
 ax.set_ylabel('Evasao')
-st.pyplot()
+st.pyplot(fig)
 st.set_option('deprecation.showPyplotGlobalUse', False)
