@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 # Título do aplicativo
 st.title('PBAER')
+st.write('alguma coisa')
 
 arr = np.random.normal(1, 1, size=100)
 fig, ax = plt.subplots()
