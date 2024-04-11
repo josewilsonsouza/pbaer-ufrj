@@ -1,26 +1,21 @@
 import streamlit as st
 import pandas as pd
-import matplotlib
-from matplotlib import pyplot as plt
 
 # Título do aplicativo
-st.title('Análise de Dados com Streamlit')
+st.title('PBAER')
 
-# Carregar os dados do arquivo local
-file_path = "Dados_EVA_RET_SUC_Cursos_CCMN.xlsx"
-data = pd.read_excel(file_path)
-data = data.loc[data.CO_CURSO==14324].copy()
+with st.container():
+    st.subheader("Teste com o Streamlit")
+    st.title("Dashboard do Projeto ")
 
-# Exibir os dados
-st.write("Visualização dos dados:")
-st.write(data)
+@st.cache_data
+def carregar_dados():
+    tabela = pd.read_excel('Media_EVA_RET_SUC_por_CENTRO.xlsx')
+    return tabela
 
-# Criar um gráfico simples (contagem de valores)
-st.write("Gráfico de Dispersão entre 'Evasao' e 'Ano':")
-
-fig, ax = plt.subplots()
-ax.scatter(data['CO_ANO'], data['Evasao'])
-ax.set_xlabel('Ano')
-ax.set_ylabel('Evasao')
-st.pyplot(fig)
-st.set_option('deprecation.showPyplotGlobalUse', False)
+with st.container():
+    st.write("---")
+    centros = st.selectbox("Selecione o CENTRO", ['CCMN','CT'])
+    dados = carregar_dados() 
+    dados = dados.loc[dados.CENTRO == centros].copy()
+    st.scatter_chart(dados, x="CO_ANO", y="EVASAO")
