@@ -10,7 +10,7 @@ with st.container():
 
 @st.cache_data
 def carregar_dados():
-    tabela = pd.read_csv('Media_EVA_RET_SUC_por_CENTRO.csv')
+    tabela = pd.read_csv('Media_EVA_RET_SUC_por_CENTRO.csv', sep=';', encoding='utf-8')
     return tabela
 
 with st.container():
