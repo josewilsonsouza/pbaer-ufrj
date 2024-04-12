@@ -30,7 +30,6 @@ def grafico_GERAL(df):
         st.header("Análise GERAL")
     
         st.write("---")
-        df = carregar_dados_CENTROS()
         centros = st.selectbox("Selecione o CENTRO", sorted(df['CENTRO'].unique()))
         df_filter = df.loc[df.CENTRO == centros].copy()
         
@@ -96,7 +95,8 @@ def grafico_RedeOrigem_CURSOS(df):
 
 recorte = st.sidebar.radio("RECORTES", ["Por Rede de Origem", "Por Cota","Por Etnia",'Sem recorte'])
 # Determinar qual seção exibir
+df = carregar_dados_CENTROS()
 if recorte == "Sem recorte":
-    grafico_GERAL()
+    grafico_GERAL(df)
 elif recorte == "Por Cota":
     st.write("Conteúdo de COTA aqui...")
