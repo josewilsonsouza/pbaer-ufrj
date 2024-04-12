@@ -8,7 +8,7 @@ st.title('PBAER')
 st.sidebar.image('logo_ufrj.png', use_column_width=True)
 
 @st.cache_data
-def carregar_dados():
+def carregar_dados_CENTROS():
     tabela = pd.read_csv('Media_EVA_RET_SUC_por_CENTRO.csv', sep=';', encoding='utf-8')
     return tabela
 
@@ -98,6 +98,5 @@ recorte = st.sidebar.radio("RECORTES", ["Por Rede de Origem", "Por Cota","Por Et
 # Determinar qual seção exibir
 if recorte == "Sem recorte":
     grafico_GERAL()
-    
 elif recorte == "Por Cota":
     st.write("Conteúdo de COTA aqui...")
