@@ -4,6 +4,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 import altair as alt
 
+def dark_theme():
+    dark_style = """
+    <style>
+    .reportview-container {
+        background: #111;
+        color: #F8F8FF;
+    }
+    </style>
+    """
+    st.markdown(dark_style, unsafe_allow_html=True)
+
+# Chama a função para aplicar o tema escuro
+dark_theme()
+
+
 # Título do aplicativo
 st.set_page_config(layout="wide")
 
