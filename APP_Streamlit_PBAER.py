@@ -6,7 +6,7 @@ import altair as alt
 
 st.set_page_config(layout = "wide")
 st.title('PBAER')
-st.sidebar.image('logo_ufrj.png', use_column_width = True)
+st.sidebar.image('DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png', use_column_width = True)
 
 @st.cache_data
 def df_tajetoria():
