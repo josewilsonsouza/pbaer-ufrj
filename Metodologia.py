@@ -2,8 +2,6 @@
 
 ## Codificação do texto Latex
 
-import streamlit as st
-
 # Explicação da fórmula
 st.markdown(r'''
 ### Fórmula para o cálculo da Evasão:
