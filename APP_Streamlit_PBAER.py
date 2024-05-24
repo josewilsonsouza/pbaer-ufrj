@@ -222,7 +222,13 @@ elif recorte == "Metodologia de Cálculo":
     st.title("Metodolgia de Cálculo")
     st.write("---")
        
-    import Metodologia
+    metodologia = 'Metodologia.py'
+    # Ler o conteúdo do arquivo Metodologia.py
+    with open(metodologia, 'r') as file:
+        metodologia = file.read()
+    # Executar o conteúdo do arquivo Metodologia.py
+    exec(metodologia)
+
     
     
     
