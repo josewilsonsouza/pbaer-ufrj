@@ -8,17 +8,14 @@ st.set_page_config(layout = "wide")
 st.title('PBAER')
 st.sidebar.image('logo_ufrj.png', use_column_width = True)
 
-global dir
-dir = 'https://raw.githubusercontent.com/josewilsonsouza/PBAER_UFRJ/main/'
-
 @st.cache_data
 def df_tajetoria():
-    df_trajetoria = pd.read_csv(dir+'DADOS_ENSINO_SUPERIOR_UFRJ/Indicadores_Trajetoria.csv')
+    df_trajetoria = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/Indicadores_Trajetoria.csv')
     return df_trajetoria
 
 @st.cache_data
 def df_cursos():
-    df_cursos = pd.read_csv(dir+'DADOS_ENSINO_SUPERIOR_UFRJ/CURSOS.csv')
+    df_cursos = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/CURSOS.csv')
     df_cursos = df_cursos.query('CENTRO != "EAD" ')
     return df_cursos
 
@@ -48,9 +45,9 @@ class CentrosRecortes:
 def carregar_dados_CENTROS(ref = None):
     
     if ref == 'TOTAL':
-        df = pd.read_csv(dir+'DADOS_APP/DADOS_CENTROS_TOTAL.csv')
+        df = pd.read_csv('DADOS_APP/DADOS_CENTROS_TOTAL.csv')
     else:
-        df = pd.read_csv(dir+'DADOS_APP/DADOS_CENTROS.csv')
+        df = pd.read_csv('DADOS_APP/DADOS_CENTROS.csv')
         
     cols_melt = ['NU_ANO_CENSO','CENTRO', 'QT_ING','QT_MAT','QT_CONC']
     df = df.melt(id_vars = cols_melt, var_name='Taxas', value_name='Percentuais')
@@ -62,9 +59,9 @@ def carregar_dados_CENTROS(ref = None):
 def carregar_dados_CURSOS(ref = None):
     
     if ref == 'TOTAL':
-        df = pd.read_csv(dir+'DADOS_APP/DADOS_CURSOS_REF_TOTAL.csv')
+        df = pd.read_csv('DADOS_APP/DADOS_CURSOS_REF_TOTAL.csv')
     else:
-        df = pd.read_csv(dir+'DADOS_APP/DADOS_CURSOS.csv')
+        df = pd.read_csv('DADOS_APP/DADOS_CURSOS.csv')
         
     df = df.melt(id_vars=['NU_ANO_CENSO','CO_CURSO','CENTRO','NO_CURSO',
                           'DURACAO','QT_ING','QT_MAT','QT_CONC'], 
@@ -225,7 +222,7 @@ elif recorte == "Metodologia de Cálculo":
     st.title("Metodolgia de Cálculo")
     st.write("---")
        
-    import Metodologia_de_calculo
+    import Metodologia
     
     
     
