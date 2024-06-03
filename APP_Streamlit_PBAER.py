@@ -210,8 +210,8 @@ def grafico_TRAJETORIA(curso_ou_centro, indicador):
 
 box_taxa = ['EVASAO', 'RETENCAO', 'SUCESSO']
 
-dfcentros = load_df_centros()
-dfcursos = load_df_cursos()
+dfcentros = load_data_centros()
+dfcursos = load_data_cursos()
 dfcursos = dfcursos.query('CO_CURSO != 116844 or NU_ANO_CENSO != 2012') #dado ruim do bcmt
 
 for t in box_taxa:
