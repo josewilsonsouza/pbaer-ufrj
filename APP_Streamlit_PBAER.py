@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+from altair_data_server import data_server
 
 # Título do aplicativo
 
@@ -8,16 +9,29 @@ st.set_page_config(layout = "wide")
 st.title('PBAER')
 st.sidebar.image('DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png', use_column_width = True)
 
-@st.cache_data
-def df_tajetoria():
-    df_trajetoria = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/Indicadores_Trajetoria.csv')
-    return df_trajetoria
+# Título do aplicativo
+
+st.set_page_config(layout = "wide")
+st.markdown("<h2 style='text-align: center;'>PBAER - UFRJ </h2>", unsafe_allow_html=True)
+
+st.sidebar.image('DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png', use_column_width = True)
 
 @st.cache_data
 def df_cursos():
     df_cursos = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/CURSOS.csv')
     df_cursos = df_cursos.query('CENTRO != "EAD" ')
     return df_cursos
+
+@st.cache_data
+def df_trajetoria():
+    df_trajetoria = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/Indicadores_Trajetoria.csv')
+    df_centros = df_cursos().loc[:,['CO_CURSO','CENTRO']]
+    df_trajetoria = df_trajetoria.merge(df_centros, on = ['CO_CURSO'], how = 'left')
+    df_trajetoria = df_trajetoria.dropna(subset=['CENTRO'])
+    
+    df_trajetoria['ANO_INGRESSO'] = 'Turma de ' +  df_trajetoria['ANO_INGRESSO'].astype(str)
+    
+    return df_trajetoria
 
 ###########################################################################################
 
@@ -55,6 +69,7 @@ def carregar_dados_CENTROS(ref = None):
     
     return df
 
+
 @st.cache_data
 def carregar_dados_CURSOS(ref = None):
     
@@ -62,6 +77,8 @@ def carregar_dados_CURSOS(ref = None):
         df = pd.read_csv('DADOS_APP/DADOS_CURSOS_REF_TOTAL.csv')
     else:
         df = pd.read_csv('DADOS_APP/DADOS_CURSOS.csv')
+    
+    df = df.query('CO_CURSO != 116844 or NU_ANO_CENSO != 2012')#dado ruim do bcmt
         
     df = df.melt(id_vars=['NU_ANO_CENSO','CO_CURSO','CENTRO','NO_CURSO',
                           'DURACAO','QT_ING','QT_MAT','QT_CONC'], 
@@ -128,7 +145,7 @@ def grafico_recorte(recorte, curso_ou_centro, taxa, ref = None):
         
         if isinstance(curso_ou_centro, str):
             df = df.loc[df.CENTRO == curso_ou_centro].copy()
-            cores = ['cyan', 'Gold','Lime', 'green']
+            cores = ['cyan', 'Gold','Lime','coral']
         else:
             df = df.loc[df.CO_CURSO == curso_ou_centro].copy()
             cores = ['OrangeRed', 'orange', 'green', 'blue', 'cyan']
@@ -148,48 +165,77 @@ def grafico_recorte(recorte, curso_ou_centro, taxa, ref = None):
         )+alt.Chart(df).mark_point(opacity=0.3,size=110, filled=True).encode(
             x='NU_ANO_CENSO',
             y='Percentuais',
-            color=alt.Color('Taxas', legend=alt.Legend(title='Legenda')))
-        
+            color=alt.Color('Taxas'))
        
-        grafico = grafico.properties(width=450,
-                                     height=300,
-                                     ).configure_legend(
-                                         orient='bottom').interactive()
+        grafico = grafico.properties(width=450,height=300).configure_legend(orient='bottom').interactive()
+        
     return grafico,df
         
 #############################################################################
 
-recorte = st.sidebar.radio("RECORTES", ['Recortes',"Indicadore de Trajetória", 'Metodologia de Cálculo'])
+def grafico_TRAJETORIA(curso_ou_centro, indicador):
+    
+    df = df_trajetoria()
+    
+    if isinstance(curso_ou_centro, str):
+        if curso_ou_centro == 'UFRJ':
+            dados = df
+            
+        else:
+            dados = df.loc[df.CENTRO == curso_ou_centro].copy()
+        valor_Y = f'average({indicador})'
+    else:
+        dados = df.loc[df.CO_CURSO == curso_ou_centro].copy()
+        valor_Y = indicador
+    
+    grafico = alt.Chart(dados).mark_line(point=True).encode(
+    x = alt.X('ANO_REFERENCIA', axis = alt.Axis(format='d'), title = 'ANO'),
+    y = alt.Y(valor_Y,scale=alt.Scale(domain=[0,100], nice = 10), title = indicador),
+    color = alt.Color('ANO_INGRESSO', title = 'TURMA')
+    )
+    
+    return grafico
 
-if recorte == "Recortes":
-    st.header("Análise por Recorte")
-    st.write("---")
-        
+#############################################################################
+
+box_taxa = ['EVASAO', 'RETENCAO', 'SUCESSO']
+
+dfcursos = pd.read_csv('DADOS_APP/DADOS_CURSOS.csv')
+dfcentros = pd.read_csv('DADOS_APP/DADOS_CENTROS.csv')
+
+dfcursos = dfcursos.query('CO_CURSO != 116844 or NU_ANO_CENSO != 2012') #dado ruim do bcmt
+
+for t in box_taxa:
+    dfcursos[t] = dfcursos[t]/100
+    dfcentros[t] = dfcentros[t]/100
+    
+abas = st.sidebar.radio("SEÇÕES", ['Evasão - Rentenção - Sucesso',"Indicadores de Trajetória", 'Metodologia de Cálculo'])
+
+if abas == "Evasão - Rentenção - Sucesso":
+    
     df_cursos = df_cursos()
-    
-    
-    #st.altair_chart(grafico_recorte('GERAL', 'UFRJ', taxa)[0], use_container_width=True)
-    
-    box_taxa = ['EVASAO', 'RETENCAO', 'SUCESSO']
-    taxa = st.selectbox('SELECIONE A TAXA', box_taxa)
-    
+    taxa = st.radio('SELECIONE A TAXA', box_taxa)
     fig1, fig2 = st.columns(2)
 
     with fig1:
-        # CAIXA DE SELEÇÃO DO CURSO E TAXA
+        # CAIXA DE SELEÇÃO DO CURSO
+        
+        #c = st.selectbox("CENTRO", sorted(CentrosRecortes.CENTROS))
+        
         codigos = df_cursos['CO_CURSO'].unique()
         cursos = [list(df_cursos.loc[df_cursos.CO_CURSO==codigo].NO_CURSO)[0] for codigo in codigos]
         boxselect = [f'{n} - {c}' for c,n in zip(codigos,cursos)]
-        
+
         box_cursos = st.selectbox("CURSO", sorted(boxselect))
         curso = int(box_cursos.split(' ')[-1])
+        
         # CAIXA DE SELECAO DO RECORTE
         box_recorte = CentrosRecortes.RECORTES
         recorte = st.selectbox('RECORTE', sorted(box_recorte))
-        # GRAFICO
+        
+        # GRAFICO DO RECORTE
         st.altair_chart(grafico_recorte(recorte, curso, taxa)[0],use_container_width=True)
-        
-        
+                
         # opção de exibição dos dados
         
         if st.checkbox('Exibir dados:'+' '+box_cursos):
@@ -198,27 +244,129 @@ if recorte == "Recortes":
     with fig2:
         
         
-        centro = st.selectbox("CENTRO", sorted(CentrosRecortes.CENTROS))
-        recorte = st.selectbox('RECORTE CENTROS', sorted(box_recorte))
+        centro = st.selectbox("CENTROS", sorted(CentrosRecortes.CENTROS))
+        recorte = st.selectbox('RECORTE PARA OS CENTROS', sorted(box_recorte))
         
-        if recorte == 'GERAL':
-            outras = [t for t in box_taxa if t != taxa]
-            
-            st.altair_chart(grafico_recorte(recorte, centro, taxa)[0],use_container_width=True)
-
-            if st.checkbox('Ver UFRJ'):
-                
-                st.altair_chart(grafico_recorte(recorte, 'UFRJ', taxa)[0],use_container_width=True)
-                
-        else:
-            
-            st.altair_chart(grafico_recorte(recorte, centro, taxa)[0],use_container_width=True)
+        st.altair_chart(grafico_recorte(recorte, centro, taxa)[0],use_container_width=True)
         
-
         if st.checkbox('Exibir dados:'+' '+centro):
             grafico_recorte(recorte, centro, taxa)[1]
+        
+        ## gráfico de todos os centros:
+        
+    centers = alt.Chart(dfcentros).mark_line(point=True).encode(
+        x=alt.X('NU_ANO_CENSO', scale=alt.Scale(domain=[2010, 2023]),
+            axis=alt.Axis(format='d'), title='ANO' ),
+        y=alt.Y(taxa, scale=alt.Scale(domain=[0, 1], nice=10),
+                axis=alt.Axis(format='%'), title=taxa),
+        color='CENTRO'
+        )+alt.Chart(dfcentros).mark_point(opacity=0.8).encode(
+            x='NU_ANO_CENSO',
+            y=taxa,
+            color = 'CENTRO'
+            ).properties(width=450,height=300,
+                         title=alt.TitleParams(
+                             text='MEDIA DE '+taxa+' POR CENTRO',
+                             align='center',
+                             anchor='middle'
+                             )).interactive()
+                                     
+    st.altair_chart(centers, use_container_width=True)
+            
+    ## grafico de media anual
     
-elif recorte == "Metodologia de Cálculo":
+    chart = alt.Chart(dfcursos).mark_bar(color='OrangeRed', size = 50).encode(
+        x=alt.X('NU_ANO_CENSO', axis=alt.Axis(format='d'),  title='ANO' ),
+        y=alt.Y(f'average({taxa})', axis=alt.Axis(format='%'),
+                scale=alt.Scale(domain=[0,1], nice = 10), title=taxa)
+        ).interactive()
+    
+    rotulo = chart.mark_text(
+        align='center',
+        baseline='middle',
+        dy=-10,  # Deslocamento vertical
+        color='yellow'
+    ).encode(
+        text=alt.Text(f'average({taxa})', format='.2%')
+    )
+    
+    g = (chart+ rotulo).properties(
+        title=alt.TitleParams(
+            text='MEDIA ANUAL DE '+taxa,
+            align='center',
+            anchor='middle'
+            )
+        )
+
+    
+    st.altair_chart(g, use_container_width=True)
+    
+elif abas == 'Indicadores de Trajetória':
+    
+    desc = ['TAP - Taxa de Permanência', 'TCA - Taxa de Conclusão Acumulada',
+           'TCAN - Taxa de Conclusão Anual', 'TDA - Taxa de Desistência Acumulada',
+           'TADA - Taxa de Desistência Anual']
+    
+    dftrajetoria = df_trajetoria()
+    dftrajetoria['ANO_INGRESSO'] = dftrajetoria['ANO_INGRESSO'].str.replace('Turma', 'Turmas')
+    
+    options = st.selectbox('Escolha um indicador', desc)
+    option = options.split(' ')[0]
+    
+    fig1, fig2 = st.columns(2)
+
+    with fig1:
+        # CAIXA DE SELEÇÃO DO CURSO
+        
+        
+        codigos = dftrajetoria['CO_CURSO'].unique()
+        cursos = [list(dftrajetoria.loc[dftrajetoria.CO_CURSO==codigo].NO_CURSO)[0] for codigo in codigos]
+        boxselect = [f'{n} - {c}' for c,n in zip(codigos,cursos)]
+        
+        box_cursos = st.selectbox("CURSO", sorted(boxselect))
+        curso = int(box_cursos.split(' ')[-1])
+        
+               
+        # GRAFICO Trajetoria 
+        st.altair_chart(grafico_TRAJETORIA(curso, option),use_container_width=True)
+                   
+    with fig2:
+                
+        centro = st.selectbox("CENTRO", sorted(CentrosRecortes.CENTROS))
+        
+        st.altair_chart(grafico_TRAJETORIA(centro, option), use_container_width=True)
+        
+        ## gráfico de todos os centros:
+        
+    grafico_centros = alt.Chart(dftrajetoria).mark_line(point=True).encode(
+        x=alt.X('ANO_INGRESSO', title = 'TURMAS'),
+        y=alt.Y(f'average({option})', scale=alt.Scale(domain=[0, 100], nice=10), title='MEDIA '+option),
+        color='CENTRO'
+        ).interactive().properties(
+            title=alt.TitleParams(
+                text='MEDIA '+option+' POR CENTRO',
+                align='center',
+                anchor='middle'
+                )
+            )
+                                                
+    st.altair_chart(grafico_centros, use_container_width=True)
+    
+    media_anual = alt.Chart(dftrajetoria).mark_line(color='OrangeRed',point=True).encode(
+        x=alt.X('ANO_REFERENCIA', axis=alt.Axis(format='d'), title='ANO' ),
+        y=alt.Y(f'average({option})', scale=alt.Scale(domain=[0,100], nice = 10), title='MEDIA '+option),
+        color = alt.Color('ANO_INGRESSO', title = 'TURMAS')
+        ).interactive().properties(
+            title=alt.TitleParams(
+                text='MEDIA ANUAL '+option,
+                align='center',
+                anchor='middle'
+                )
+            )
+
+    st.altair_chart(media_anual, use_container_width=True)
+    
+elif aba == "Metodologia de Cálculo":
     st.title("Metodolgia de Cálculo")
     st.write("---")
        
