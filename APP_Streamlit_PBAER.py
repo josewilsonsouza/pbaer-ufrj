@@ -4,13 +4,14 @@ import altair as alt
 from altair_data_server import data_server
 
 # Título do aplicativo
+dir = 'https://raw.githubusercontent.com/josewilsonsouza/PBAER_UFRJ/main/'
 
 st.set_page_config(layout = "wide")
 
 st.markdown(
     f"""
     <div style="display: flex; justify-content: center; align-items: center;">
-        <img src="{DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png}" width="200">
+        <img src="{dir}DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png" width="200">
     </div>
     """,
     unsafe_allow_html=True
