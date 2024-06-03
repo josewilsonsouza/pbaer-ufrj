@@ -10,7 +10,7 @@ st.set_page_config(layout = "wide")
 st.markdown(
     f"""
     <div style="display: flex; justify-content: center; align-items: center;">
-        <img src="DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png" width="200">
+        <img src="{DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png}" width="200">
     </div>
     """,
     unsafe_allow_html=True
