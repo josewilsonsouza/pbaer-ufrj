@@ -6,24 +6,37 @@ from altair_data_server import data_server
 # Título do aplicativo
 
 st.set_page_config(layout = "wide")
+
+st.markdown(
+    f"""
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <img src="DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png" width="200">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 st.markdown("<h2 style='text-align: center;'>PBAER - UFRJ </h2>", unsafe_allow_html=True)
 
-st.sidebar.image('DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png', use_column_width = True)
+@st.cache_data
+def load_df_centros():
+    df =  pd.read_csv('DADOS_APP/DADOS_CENTROS.csv')
+    return df
 
 @st.cache_data
-def df_cursos():
+def load_df_cursos():
     df_cursos = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/CURSOS.csv')
     df_cursos = df_cursos.query('CENTRO != "EAD" ')
     return df_cursos
 
 @st.cache_data
 def df_trajetoria():
-    df_trajetoria = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/Indicadores_Trajetoria.csv')
-    df_centros = df_cursos().loc[:,['CO_CURSO','CENTRO']]
-    df_trajetoria = df_trajetoria.merge(df_centros, on = ['CO_CURSO'], how = 'left')
-    df_trajetoria = df_trajetoria.dropna(subset=['CENTRO'])
+    df_traj = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/Indicadores_Trajetoria.csv')
+    df_centros = load_df_cursos().loc[:,['CO_CURSO','CENTRO']]
+    df_traj = df_traj.merge(df_centros, on = ['CO_CURSO'], how = 'left')
+    df_traj = df_traj.dropna(subset=['CENTRO'])
     
-    df_trajetoria['ANO_INGRESSO'] = 'Turma de ' +  df_trajetoria['ANO_INGRESSO'].astype(str)
+    df_traj['ANO_INGRESSO'] = 'Turma de ' +  df_traj['ANO_INGRESSO'].astype(str)
     
     return df_trajetoria
 
@@ -62,7 +75,6 @@ def carregar_dados_CENTROS(ref = None):
     df['Percentuais'] = df.Percentuais/100
     
     return df
-
 
 @st.cache_data
 def carregar_dados_CURSOS(ref = None):
@@ -115,7 +127,6 @@ def dados_recorte(recorte, curso_ou_centro , ref = None):
     df_suc_classe = df.query('Taxas in @suc_classe')
         
     return df_eva_classe, df_ret_classe, df_suc_classe
-    
     
 ########################################################################### 
 
@@ -194,30 +205,26 @@ def grafico_TRAJETORIA(curso_ou_centro, indicador):
 
 box_taxa = ['EVASAO', 'RETENCAO', 'SUCESSO']
 
-dfcursos = pd.read_csv('DADOS_APP/DADOS_CURSOS.csv')
-dfcentros = pd.read_csv('DADOS_APP/DADOS_CENTROS.csv')
-
+dfcentros = load_df_centros()
+dfcursos = load_df_cursos()
 dfcursos = dfcursos.query('CO_CURSO != 116844 or NU_ANO_CENSO != 2012') #dado ruim do bcmt
 
 for t in box_taxa:
     dfcursos[t] = dfcursos[t]/100
     dfcentros[t] = dfcentros[t]/100
     
-abas = st.sidebar.radio("SEÇÕES", ['Evasão - Rentenção - Sucesso',"Indicadores de Trajetória", 'Metodologia de Cálculo'])
+txs, inds, met = st.tabs(['Evasão-Rentenção-Sucesso',"Indicadores de Trajetória", 'Metodologia de Cálculo'])
 
-if abas == "Evasão - Rentenção - Sucesso":
+with txs:
     
-    df_cursos = df_cursos()
     taxa = st.radio('SELECIONE A TAXA', box_taxa)
     fig1, fig2 = st.columns(2)
 
     with fig1:
         # CAIXA DE SELEÇÃO DO CURSO
-        
-        #c = st.selectbox("CENTRO", sorted(CentrosRecortes.CENTROS))
-        
-        codigos = df_cursos['CO_CURSO'].unique()
-        cursos = [list(df_cursos.loc[df_cursos.CO_CURSO==codigo].NO_CURSO)[0] for codigo in codigos]
+                
+        codigos = dfcursos['CO_CURSO'].unique()
+        cursos = [list(dfcursos.loc[dfcursos.CO_CURSO==codigo].NO_CURSO)[0] for codigo in codigos]
         boxselect = [f'{n} - {c}' for c,n in zip(codigos,cursos)]
 
         box_cursos = st.selectbox("CURSO", sorted(boxselect))
@@ -236,7 +243,6 @@ if abas == "Evasão - Rentenção - Sucesso":
            grafico_recorte(recorte, curso, taxa)[1]
            
     with fig2:
-        
         
         centro = st.selectbox("CENTROS", sorted(CentrosRecortes.CENTROS))
         recorte = st.selectbox('RECORTE PARA OS CENTROS', sorted(box_recorte))
@@ -291,11 +297,10 @@ if abas == "Evasão - Rentenção - Sucesso":
             anchor='middle'
             )
         )
-
     
     st.altair_chart(g, use_container_width=True)
     
-elif abas == 'Indicadores de Trajetória':
+with inds:
     
     desc = ['TAP - Taxa de Permanência', 'TCA - Taxa de Conclusão Acumulada',
            'TCAN - Taxa de Conclusão Anual', 'TDA - Taxa de Desistência Acumulada',
@@ -311,7 +316,6 @@ elif abas == 'Indicadores de Trajetória':
 
     with fig1:
         # CAIXA DE SELEÇÃO DO CURSO
-        
         
         codigos = dftrajetoria['CO_CURSO'].unique()
         cursos = [list(dftrajetoria.loc[dftrajetoria.CO_CURSO==codigo].NO_CURSO)[0] for codigo in codigos]
@@ -360,7 +364,7 @@ elif abas == 'Indicadores de Trajetória':
 
     st.altair_chart(media_anual, use_container_width=True)
     
-elif aba == "Metodologia de Cálculo":
+with met:
     st.title("Metodolgia de Cálculo")
     st.write("---")
        
