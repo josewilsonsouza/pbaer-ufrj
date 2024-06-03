@@ -6,12 +6,6 @@ from altair_data_server import data_server
 # Título do aplicativo
 
 st.set_page_config(layout = "wide")
-st.title('PBAER')
-st.sidebar.image('DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png', use_column_width = True)
-
-# Título do aplicativo
-
-st.set_page_config(layout = "wide")
 st.markdown("<h2 style='text-align: center;'>PBAER - UFRJ </h2>", unsafe_allow_html=True)
 
 st.sidebar.image('DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png', use_column_width = True)
