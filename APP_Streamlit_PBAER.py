@@ -19,12 +19,17 @@ st.markdown(
 st.markdown("<h2 style='text-align: center;'>PBAER - UFRJ </h2>", unsafe_allow_html=True)
 
 @st.cache_data
-def load_df_centros():
+def load_data_centros():
     df =  pd.read_csv('DADOS_APP/DADOS_CENTROS.csv')
     return df
 
 @st.cache_data
-def load_df_cursos():
+def load_data_cursos():
+    df =  pd.read_csv('DADOS_APP/DADOS_CURSOS.csv')
+    return df
+
+@st.cache_data
+def load_cursos():
     df_cursos = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/CURSOS.csv')
     df_cursos = df_cursos.query('CENTRO != "EAD" ')
     return df_cursos
@@ -32,7 +37,7 @@ def load_df_cursos():
 @st.cache_data
 def df_trajetoria():
     df_traj = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/Indicadores_Trajetoria.csv')
-    df_centros = load_df_cursos().loc[:,['CO_CURSO','CENTRO']]
+    df_centros = load_cursos().loc[:,['CO_CURSO','CENTRO']]
     df_traj = df_traj.merge(df_centros, on = ['CO_CURSO'], how = 'left')
     df_traj = df_traj.dropna(subset=['CENTRO'])
     
@@ -68,7 +73,7 @@ def carregar_dados_CENTROS(ref = None):
     if ref == 'TOTAL':
         df = pd.read_csv('DADOS_APP/DADOS_CENTROS_TOTAL.csv')
     else:
-        df = pd.read_csv('DADOS_APP/DADOS_CENTROS.csv')
+        df = load_data_centros()
         
     cols_melt = ['NU_ANO_CENSO','CENTRO', 'QT_ING','QT_MAT','QT_CONC']
     df = df.melt(id_vars = cols_melt, var_name='Taxas', value_name='Percentuais')
@@ -82,7 +87,7 @@ def carregar_dados_CURSOS(ref = None):
     if ref == 'TOTAL':
         df = pd.read_csv('DADOS_APP/DADOS_CURSOS_REF_TOTAL.csv')
     else:
-        df = pd.read_csv('DADOS_APP/DADOS_CURSOS.csv')
+        df = load_data_cursos()
     
     df = df.query('CO_CURSO != 116844 or NU_ANO_CENSO != 2012')#dado ruim do bcmt
         
@@ -222,9 +227,10 @@ with txs:
 
     with fig1:
         # CAIXA DE SELEÇÃO DO CURSO
-                
-        codigos = dfcursos['CO_CURSO'].unique()
-        cursos = [list(dfcursos.loc[dfcursos.CO_CURSO==codigo].NO_CURSO)[0] for codigo in codigos]
+
+        df_cursos = load_cursos()
+        codigos = df_cursos['CO_CURSO'].unique()
+        cursos = [list(df_cursos.loc[df_cursos.CO_CURSO==codigo].NO_CURSO)[0] for codigo in codigos]
         boxselect = [f'{n} - {c}' for c,n in zip(codigos,cursos)]
 
         box_cursos = st.selectbox("CURSO", sorted(boxselect))
