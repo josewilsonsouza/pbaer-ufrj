@@ -44,7 +44,7 @@ def df_trajetoria():
     
     df_traj['ANO_INGRESSO'] = 'Turma de ' +  df_traj['ANO_INGRESSO'].astype(str)
     
-    return df_trajetoria
+    return df_traj
 
 ###########################################################################################
 
