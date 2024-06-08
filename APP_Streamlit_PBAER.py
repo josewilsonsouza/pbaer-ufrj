@@ -260,7 +260,9 @@ with txs:
             grafico_recorte(recorte, centro, taxa)[1]
         
         ## gráfico de todos os centros:
-        
+    st.write('')
+    st.write('')
+            
     centers = alt.Chart(dfcentros).mark_line(point=True).encode(
         x=alt.X('NU_ANO_CENSO', scale=alt.Scale(domain=[2010, 2023]),
             axis=alt.Axis(format='d'), title='ANO' ),
