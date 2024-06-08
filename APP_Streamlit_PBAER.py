@@ -8,12 +8,12 @@ dir = 'https://raw.githubusercontent.com/josewilsonsouza/PBAER_UFRJ/main/'
 
 st.set_page_config(layout = "wide")
 
-st.markdown(
-    f"""
+#st.markdown(
+ #   f"""
     <div style="display: flex; justify-content: center; align-items: center;">
-        <img src="{dir}DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png" width="200">
+    #    <img src="{dir}DADOS_ENSINO_SUPERIOR_UFRJ/logo_ufrj.png" width="200">
     </div>
-    """,
+    #""",
     unsafe_allow_html=True
 )
 
@@ -242,13 +242,8 @@ with txs:
         recorte = st.selectbox('RECORTE', sorted(box_recorte))
         
         # GRAFICO DO RECORTE
-        st.altair_chart(grafico_recorte(recorte, curso, taxa)[0],use_container_width=True)
-                
-        # opção de exibição dos dados
-        
-        if st.checkbox('Exibir dados:'+' '+box_cursos):
-           grafico_recorte(recorte, curso, taxa)[1]
-           
+        st.altair_chart(grafico_recorte(recorte, curso, taxa)[0],use_container_width=True)        
+                   
     with fig2:
         
         centro = st.selectbox("CENTROS", sorted(CentrosRecortes.CENTROS))
@@ -256,12 +251,9 @@ with txs:
         
         st.altair_chart(grafico_recorte(recorte, centro, taxa)[0],use_container_width=True)
         
-        if st.checkbox('Exibir dados:'+' '+centro):
-            grafico_recorte(recorte, centro, taxa)[1]
-        
-        ## gráfico de todos os centros:
+    ## gráfico de todos os centros:
     st.write('')
-    st.write('')
+    st.header(f'{taxa}',divider='gray')
             
     centers = alt.Chart(dfcentros).mark_line(point=True).encode(
         x=alt.X('NU_ANO_CENSO', scale=alt.Scale(domain=[2010, 2023]),
