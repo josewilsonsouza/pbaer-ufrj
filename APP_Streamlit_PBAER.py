@@ -276,7 +276,7 @@ with txs:
             
     ## grafico de media anual
     
-    chart = alt.Chart(dfcursos).mark_bar(color='OrangeRed', size = 50).encode(
+    chart = alt.Chart(dfcursos).mark_bar(color='#2962FF', size = 50).encode(
         x=alt.X('NU_ANO_CENSO', axis=alt.Axis(format='d'),  title='ANO' ),
         y=alt.Y(f'average({taxa})', axis=alt.Axis(format='%'),
                 scale=alt.Scale(domain=[0,1], nice = 10), title=taxa)
@@ -286,7 +286,7 @@ with txs:
         align='center',
         baseline='middle',
         dy=-10,  # Deslocamento vertical
-        color='yellow'
+        color='#EDE7F6'
     ).encode(
         text=alt.Text(f'average({taxa})', format='.2%')
     )
