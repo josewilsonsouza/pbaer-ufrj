@@ -219,7 +219,7 @@ for t in box_taxa:
     dfcursos[t] = dfcursos[t]/100
     dfcentros[t] = dfcentros[t]/100
     
-txs, inds, met = st.tabs(['Evasão-Rentenção-Sucesso',"Indicadores de Trajetória", 'Metodologia de Cálculo'])
+txs, inds, met, faq = st.tabs(['Evasão-Rentenção-Sucesso',"Indicadores de Trajetória", 'Metodologia de Cálculo','FAQ'])
 
 with txs:
     
@@ -376,10 +376,12 @@ with met:
     # Executar o conteúdo do arquivo Metodologia.py
     exec(metodologia)
 
-    
-    
-    
-    
-    
-    
-    
+with faq:
+    st.title ("FAQ")
+    st.write("---")
+
+    perguntas = "FAQ.py"
+    #Ler o conteúdo do arquivo FAQ.py
+    with open(perguntas,'r') as file:
+        perguntas = file.read()
+    exec(perguntas)
