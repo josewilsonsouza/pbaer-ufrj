@@ -6,7 +6,7 @@ from altair_data_server import data_server
 # Título do aplicativo
 dir = 'https://raw.githubusercontent.com/josewilsonsouza/PBAER_UFRJ/main/'
 
-st.set_page_config(layout = "wide")
+st.set_page_config(page_title="PBAER UFRJ", page_icon=":bar_chart:", layout="wide", initial_sidebar_state="auto")
 
 st.markdown(
     f"""
@@ -61,6 +61,7 @@ class Rotulos:
   COTA = ['ETNICO','REDE PUBLICA','SOCIAL']
   ETNIA = ['BRANCA','PRETA','PARDA']
   SEXO = ['MASCULINO', 'FEMININO']
+  ETNIA_TOTAL = ETNIA
 
 class CentrosRecortes:
   CENTROS = ['CCMN', 'CT', 'CCJE', 'CFCH', 'CCS', 'CLA', 'MACAE', 'CAXIAS', 'UFRJ']
@@ -161,8 +162,13 @@ def grafico_recorte(recorte, curso_ou_centro, taxa, ref = None):
             df = df.loc[df.CO_CURSO == curso_ou_centro].copy()
             cores = ['OrangeRed', 'orange', 'green', 'blue', 'cyan']
             
+        if ref == 'TOTAL':
+            nome_fim = '_'+ref
+        else:
+            nome_fim = ''
+            
         if recorte != 'GERAL':
-            df['Taxas'] = df['Taxas'].map({taxa+'_'+classe: f'{classe}' for classe in CLASSES})
+            df['Taxas'] = df['Taxas'].map({taxa+'_'+classe+nome_fim: f'{classe}' for classe in CLASSES})
         
         
         grafico = alt.Chart(df).mark_line(point=True).encode(
@@ -222,146 +228,179 @@ for t in box_taxa:
 txs, inds, met, faq = st.tabs(['Evasão-Rentenção-Sucesso',"Indicadores de Trajetória", 'Metodologia de Cálculo','FAQ'])
 
 with txs:
-    
+
+    df_cursos = load_cursos()
     taxa = st.radio('SELECIONE A TAXA', box_taxa)
-    fig1, fig2 = st.columns(2)
-
-    with fig1:
-        # CAIXA DE SELEÇÃO DO CURSO
-
-        df_cursos = load_cursos()
-        codigos = df_cursos['CO_CURSO'].unique()
-        cursos = [list(df_cursos.loc[df_cursos.CO_CURSO==codigo].NO_CURSO)[0] for codigo in codigos]
-        boxselect = [f'{n} - {c}' for c,n in zip(codigos,cursos)]
-
-        box_cursos = st.selectbox("CURSO", sorted(boxselect))
-        curso = int(box_cursos.split(' ')[-1])
         
+    fig1, fig2 = st.columns(2)
+    
+    with fig1:
+        
+        col1, col2 = st.columns([1,3])
+        
+        with col1:
+                    
+            select_CENTRO = st.selectbox("CENTRO", sorted(CentrosRecortes.CENTROS),8, key = 0)
+            codigos = df_cursos.query(f'CENTRO == "{select_CENTRO}"')['CO_CURSO'].unique()
+            
+            if select_CENTRO == 'UFRJ':
+                codigos = df_cursos['CO_CURSO'].unique()
+            
+            cursos = [list(df_cursos.loc[df_cursos.CO_CURSO == codigo].NO_CURSO)[0] for codigo in codigos]
+            
+        with col2:
+            
+            boxselect = [f'{n} - {c}' for c, n in zip(codigos, cursos)]
+            box_cursos = st.selectbox("CURSO", sorted(boxselect), key=2)    
+            curso = int(box_cursos.split(' ')[-1])
+    
         # CAIXA DE SELECAO DO RECORTE
         box_recorte = CentrosRecortes.RECORTES
-        recorte = st.selectbox('RECORTE', sorted(box_recorte))
+        recorte_curso = st.selectbox('RECORTE', sorted(box_recorte))
         
         # GRAFICO DO RECORTE
-        st.altair_chart(grafico_recorte(recorte, curso, taxa)[0],use_container_width=True)        
-                   
+        if recorte_curso == 'ETNIA_TOTAL':
+            st.altair_chart(grafico_recorte(recorte_curso, curso, taxa,ref='TOTAL')[0], use_container_width=True)
+        else:
+            st.altair_chart(grafico_recorte(recorte_curso, curso, taxa)[0], use_container_width=True)
+
     with fig2:
-        
-        centro = st.selectbox("CENTROS", sorted(CentrosRecortes.CENTROS))
+        centro = st.selectbox("CENTROS", sorted(CentrosRecortes.CENTROS),8)
+      
         recorte = st.selectbox('RECORTE PARA OS CENTROS', sorted(box_recorte))
-        
-        st.altair_chart(grafico_recorte(recorte, centro, taxa)[0],use_container_width=True)
-        
-    ## gráfico de todos os centros:
+
+        if recorte == 'ETNIA_TOTAL':
+            st.altair_chart(grafico_recorte(recorte, centro, taxa,'TOTAL')[0], use_container_width=True)
+        else:
+            st.altair_chart(grafico_recorte(recorte, centro, taxa)[0], use_container_width=True)
+            
+
+    # gráfico de todos os centros:
     st.write('')
-    st.header(f'{taxa}',divider='gray')
-            
-    centers = alt.Chart(dfcentros).mark_line(point=True).encode(
+    st.header(f'{taxa}', divider='gray')
+    
+    CENTROS = st.multiselect("CENTROS", sorted(CentrosRecortes.CENTROS), centro)
+    dfCENTRO = dfcentros.query('CENTRO in @CENTROS').copy()
+        
+    txt_title = 'MEDIA DE <span style="color: OrangeRed;">'+taxa+'</span> POR CENTRO'
+    
+    centers = alt.Chart(dfCENTRO).mark_line(point=True).encode(
         x=alt.X('NU_ANO_CENSO', scale=alt.Scale(domain=[2010, 2023]),
-            axis=alt.Axis(format='d'), title='ANO' ),
+                axis=alt.Axis(format='d'), title='ANO'),
         y=alt.Y(taxa, scale=alt.Scale(domain=[0, 1], nice=10),
-                axis=alt.Axis(format='%'), title=taxa),
+                axis=alt.Axis(format='%'), title = taxa),
         color='CENTRO'
-        )+alt.Chart(dfcentros).mark_point(opacity=0.8).encode(
-            x='NU_ANO_CENSO',
-            y=taxa,
-            color = 'CENTRO'
-            ).properties(width=450,height=300,
-                         title=alt.TitleParams(
-                             text='MEDIA DE '+taxa+' POR CENTRO',
-                             align='center',
-                             anchor='middle'
-                             )).interactive()
-                                     
+    )+alt.Chart(dfCENTRO).mark_point(opacity=0.8).encode(
+        x='NU_ANO_CENSO',
+        y=taxa,
+        color='CENTRO'
+    ).properties(width=450, height=300).interactive()
+                 
+    st.markdown(f"<h3 style='text-align: center;'>{txt_title}</h3>", unsafe_allow_html=True)
     st.altair_chart(centers, use_container_width=True)
-            
-    ## grafico de media anual
-    
+
+    # grafico de media anual
+
     chart = alt.Chart(dfcursos).mark_bar(color='#2962FF').encode(
-        x=alt.X('NU_ANO_CENSO', axis=alt.Axis(format='d'),  title='ANO' ),
+        x=alt.X('NU_ANO_CENSO', axis=alt.Axis(format='d'),  title='ANO'),
         y=alt.Y(f'average({taxa})', axis=alt.Axis(format='%'),
-                scale=alt.Scale(domain=[0,1], nice = 10), title=taxa)
+                scale=alt.Scale(domain=[0, 1], nice=10), title=taxa)
         ).interactive()
-    
+
     rotulo = chart.mark_text(
         align='center',
         baseline='middle',
         dy=-10,  # Deslocamento vertical
-        color='#EDE7F6'
+        color='Orange'
     ).encode(
         text=alt.Text(f'average({taxa})', format='.2%')
     )
+        
+    title = 'MEDIA ANUAL DE <span style="color: OrangeRed;">'+taxa+'</span>'
+
+    g = (chart + rotulo).properties()
     
-    g = (chart+ rotulo).properties(
-        title=alt.TitleParams(
-            text='MEDIA ANUAL DE '+taxa,
-            align='center',
-            anchor='middle'
-            )
-        )
-    
+    st.markdown(f"<h3 style='text-align: center;'>{title}</h3>", unsafe_allow_html=True)
     st.altair_chart(g, use_container_width=True)
-    
+
 with inds:
-    
+
     desc = ['TAP - Taxa de Permanência', 'TCA - Taxa de Conclusão Acumulada',
-           'TCAN - Taxa de Conclusão Anual', 'TDA - Taxa de Desistência Acumulada',
-           'TADA - Taxa de Desistência Anual']
-    
+            'TCAN - Taxa de Conclusão Anual', 'TDA - Taxa de Desistência Acumulada',
+            'TADA - Taxa de Desistência Anual']
+
     dftrajetoria = df_trajetoria()
     dftrajetoria['ANO_INGRESSO'] = dftrajetoria['ANO_INGRESSO'].str.replace('Turma', 'Turmas')
-    
+
     options = st.selectbox('Escolha um indicador', desc)
     option = options.split(' ')[0]
-    
+    name_ind = options.split('-')[1]
+
     fig1, fig2 = st.columns(2)
 
     with fig1:
         # CAIXA DE SELEÇÃO DO CURSO
-        
+
         codigos = dftrajetoria['CO_CURSO'].unique()
-        cursos = [list(dftrajetoria.loc[dftrajetoria.CO_CURSO==codigo].NO_CURSO)[0] for codigo in codigos]
-        boxselect = [f'{n} - {c}' for c,n in zip(codigos,cursos)]
-        
+        cursos = [list(dftrajetoria.loc[dftrajetoria.CO_CURSO == codigo].NO_CURSO)[0] for codigo in codigos]
+        boxselect = [f'{n} - {c}' for c, n in zip(codigos, cursos)]
+
         box_cursos = st.selectbox("CURSO", sorted(boxselect))
         curso = int(box_cursos.split(' ')[-1])
-        
-               
-        # GRAFICO Trajetoria 
-        st.altair_chart(grafico_TRAJETORIA(curso, option),use_container_width=True)
-                   
+
+        # GRAFICO Trajetoria
+        st.altair_chart(grafico_TRAJETORIA(curso, option),
+                        use_container_width=True)
+
     with fig2:
-                
+
         centro = st.selectbox("CENTRO", sorted(CentrosRecortes.CENTROS))
-        
-        st.altair_chart(grafico_TRAJETORIA(centro, option), use_container_width=True)
-        
-        ## gráfico de todos os centros:
-        
-    grafico_centros = alt.Chart(dftrajetoria).mark_line(point=True).encode(
-        x=alt.X('ANO_INGRESSO', title = 'TURMAS'),
-        y=alt.Y(f'average({option})', scale=alt.Scale(domain=[0, 100], nice=10), title='MEDIA '+option),
+
+        st.altair_chart(grafico_TRAJETORIA(centro, option),
+                        use_container_width=True)
+
+    # gráfico de todos os centros:
+    
+    st.write('')
+    st.header(f'{option} - {name_ind} por CENTRO', divider='gray')
+    
+    CENTROS = st.multiselect("CENTROS", sorted(CentrosRecortes.CENTROS), centro,key=1)
+    dftrajetoriaCENTRO = dftrajetoria.query('CENTRO in @CENTROS').copy()
+
+    grafico_centros = alt.Chart(dftrajetoriaCENTRO).mark_line(point=True).encode(
+        x=alt.X('ANO_INGRESSO', title='TURMAS'),
+        y=alt.Y(f'average({option})', scale=alt.Scale(
+            domain=[0, 100], nice=10), title='MEDIA '+option),
         color='CENTRO'
-        ).interactive().properties(
-            title=alt.TitleParams(
-                text='MEDIA '+option+' POR CENTRO',
-                align='center',
-                anchor='middle'
-                )
-            )
-                                                
+    ).interactive().properties(
+        title=alt.TitleParams(
+            text='MEDIA '+option+' POR CENTRO',
+            align='center',
+            anchor='middle'
+        )
+    )
+        
     st.altair_chart(grafico_centros, use_container_width=True)
     
-    media_anual = alt.Chart(dftrajetoria).mark_line(color='OrangeRed',point=True).encode(
-        x=alt.X('ANO_REFERENCIA', axis=alt.Axis(format='d'), title='ANO' ),
-        y=alt.Y(f'average({option})', scale=alt.Scale(domain=[0,100], nice = 10), title='MEDIA '+option),
-        color = alt.Color('ANO_INGRESSO', title = 'TURMAS')
-        ).interactive().properties(
-            title=alt.TitleParams(
-                text='MEDIA ANUAL '+option,
-                align='center',
-                anchor='middle'
-                )
-            )
+    st.write('')
+    st.header(f'{option} - {name_ind} por TURMAS', divider='gray')
+    
+    turmas = dftrajetoria.ANO_INGRESSO.unique()
+    select_TURMAS = st.multiselect('TURMAS',sorted(turmas),turmas)
+    df_select = dftrajetoria.query("ANO_INGRESSO in @select_TURMAS").copy()
+
+    media_anual = alt.Chart(df_select).mark_line(color='OrangeRed', point=True).encode(
+        x=alt.X('ANO_REFERENCIA', axis=alt.Axis(format='d'), title='ANO'),
+        y=alt.Y(f'average({option})', scale=alt.Scale(
+            domain=[0, 100], nice=10), title='MEDIA '+option),
+        color=alt.Color('ANO_INGRESSO', title='TURMAS')
+    ).interactive().properties(
+        title=alt.TitleParams(
+            text='MEDIA ANUAL '+option,
+            align='center',
+            anchor='middle'
+        )
+    )
 
     st.altair_chart(media_anual, use_container_width=True)
     
@@ -371,7 +410,7 @@ with met:
        
     metodologia = 'Metodologia.py'
     # Ler o conteúdo do arquivo Metodologia.py
-    with open(metodologia, 'r') as file:
+    with open(metodologia, 'r', encoding='utf-8') as file:
         metodologia = file.read()
     # Executar o conteúdo do arquivo Metodologia.py
     exec(metodologia)
@@ -382,6 +421,6 @@ with faq:
 
     perguntas = "FAQ.py"
     #Ler o conteúdo do arquivo FAQ.py
-    with open(perguntas,'r') as file:
+    with open(perguntas,'r',encoding='utf-8') as file:
         perguntas = file.read()
     exec(perguntas)
