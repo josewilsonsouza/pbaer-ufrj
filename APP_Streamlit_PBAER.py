@@ -65,7 +65,7 @@ class Rotulos:
 
 class CentrosRecortes:
   CENTROS = ['CCMN', 'CT', 'CCJE', 'CFCH', 'CCS', 'CLA', 'MACAE', 'CAXIAS', 'UFRJ']
-  RECORTES = ['PROCEDENCIA','COTA','ETNIA','SEXO','GERAL']
+  RECORTES = ['PROCEDENCIA','COTA','ETNIA','SEXO','GERAL','ETNIA_TOTAL']
 
 ###########################################################################################
 
