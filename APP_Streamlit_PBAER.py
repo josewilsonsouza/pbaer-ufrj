@@ -73,7 +73,7 @@ class CentrosRecortes:
 def carregar_dados_CENTROS(ref = None):
     
     if ref == 'TOTAL':
-        df = pd.read_csv('DADOS_APP/DADOS_CENTROS_TOTAL.csv')
+        df = pd.read_csv('DADOS_APP/DADOS_CENTROS_REF_TOTAL.csv')
     else:
         df = load_data_centros()
         
