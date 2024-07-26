@@ -65,7 +65,7 @@ class Rotulos:
 
 class CentrosRecortes:
   CENTROS = ['CCMN', 'CT', 'CCJE', 'CFCH', 'CCS', 'CLA', 'MACAE', 'CAXIAS', 'UFRJ']
-  RECORTES = ['PROCEDENCIA','COTA','ETNIA','SEXO','GERAL']
+  RECORTES = ['PROCEDENCIA','COTA','ETNIA','SEXO','GERAL','ETNIA_TOTAL']
 
 ###########################################################################################
 
@@ -73,7 +73,7 @@ class CentrosRecortes:
 def carregar_dados_CENTROS(ref = None):
     
     if ref == 'TOTAL':
-        df = pd.read_csv('DADOS_APP/DADOS_CENTROS_TOTAL.csv')
+        df = pd.read_csv('DADOS_APP/DADOS_CENTROS_REF_TOTAL.csv')
     else:
         df = load_data_centros()
         
