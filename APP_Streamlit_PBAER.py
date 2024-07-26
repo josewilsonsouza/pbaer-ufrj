@@ -65,7 +65,7 @@ class Rotulos:
 
 class CentrosRecortes:
   CENTROS = ['CCMN', 'CT', 'CCJE', 'CFCH', 'CCS', 'CLA', 'MACAE', 'CAXIAS', 'UFRJ']
-  RECORTES = ['PROCEDENCIA','COTA','ETNIA','SEXO','GERAL','ETNIA_TOTAL']
+  RECORTES = ['PROCEDENCIA','COTA','ETNIA','SEXO','GERAL']
 
 ###########################################################################################
 
@@ -157,10 +157,10 @@ def grafico_recorte(recorte, curso_ou_centro, taxa, ref = None):
         
         if isinstance(curso_ou_centro, str):
             df = df.loc[df.CENTRO == curso_ou_centro].copy()
-            cores = ['cyan', 'Gold','Lime','coral']
         else:
             df = df.loc[df.CO_CURSO == curso_ou_centro].copy()
-            cores = ['OrangeRed', 'orange', 'green', 'blue', 'cyan']
+        
+        cores = ['OrangeRed', 'orange', 'green', 'blue', 'cyan']
             
         if ref == 'TOTAL':
             nome_fim = '_'+ref
