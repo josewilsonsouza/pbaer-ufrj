@@ -3,7 +3,6 @@ import pandas as pd
 import altair as alt
 from altair_data_server import data_server
 
-#------------------------------------------------------------------------------------------------------#
 # Título do aplicativo
 dir = 'https://raw.githubusercontent.com/josewilsonsouza/PBAER_UFRJ/main/'
 
@@ -19,8 +18,6 @@ st.markdown(
 )
 
 st.markdown("<h2 style='text-align: center;'>PBAER - UFRJ </h2>", unsafe_allow_html=True)
-
-#------------------------------------------------------------------------------------------------------#
 
 @st.cache_data
 def load_data_centros():
@@ -49,7 +46,7 @@ def df_trajetoria():
     
     return df_traj
 
-#######################################################################################################
+###########################################################################################
 
 class Recorte:
   GERAL = ['EVASAO','RETENCAO','SUCESSO']
@@ -57,7 +54,6 @@ class Recorte:
   COTA = ['RVETNICO','RVREDEPUBLICA','RVSOCIAL_RF']
   ETNIA = ['BRANCA','PRETA','PARDA']
   SEXO = ['MASC', 'FEM']
-  ETNIA_TOTAL = ETNIA
 
 class Rotulos:
   GERAL = ['EVASAO','RETENCAO','SUCESSO']
@@ -71,12 +67,7 @@ class CentrosRecortes:
   CENTROS = ['CCMN', 'CT', 'CCJE', 'CFCH', 'CCS', 'CLA', 'MACAE', 'CAXIAS', 'UFRJ']
   RECORTES = ['PROCEDENCIA','COTA','ETNIA','SEXO','GERAL','ETNIA_TOTAL']
 
-class Coningmat:
-    MAT = 'MATRICULADOS'
-    ING = 'INGRESSANTES'
-    CONC = 'CONCLUINTES'
-
-#######################################################################################################
+###########################################################################################
 
 @st.cache_data
 def carregar_dados_CENTROS(ref = None):
@@ -91,7 +82,6 @@ def carregar_dados_CENTROS(ref = None):
     df['Percentuais'] = df.Percentuais/100
     
     return df
-#------------------------------------------------------------------------------------------------------#
 
 @st.cache_data
 def carregar_dados_CURSOS(ref = None):
@@ -111,8 +101,8 @@ def carregar_dados_CURSOS(ref = None):
     df['Percentuais'] = df.Percentuais/100
     
     return df
-
- #------------------------------------------------------------------------------------------------------#
+ 
+###########################################################################################
 
 @st.cache_data
 def dados_recorte(recorte, curso_ou_centro , ref = None):
@@ -144,76 +134,8 @@ def dados_recorte(recorte, curso_ou_centro , ref = None):
     df_suc_classe = df.query('Taxas in @suc_classe')
         
     return df_eva_classe, df_ret_classe, df_suc_classe
-#------------------------------------------------------------------------------------------------------#
-
-@st.cache_data
-def load_coningmat(var='MATRICULADOS'):
-    data = pd.read_csv(f'DADOS_APP/{var}.csv',sep=',')
-    return data
-#------------------------------------------------------------------------------------------------------#
-
-def data_con_ing_mat(curso_ou_centro, recorte, var = 'MATRICULADOS'):
-
-    if recorte != 'GERAL':
-
-        RECORTE, ROTULOS = Recorte(), Rotulos()
-        VARS = getattr(RECORTE, recorte)
-        NAMES = getattr(ROTULOS, recorte)
-
-        data = load_coningmat(var)
-
-        if curso_ou_centro == 'UFRJ':
-            data['CENTRO'] = 'UFRJ'
-
-        data = data.query('CENTRO == @curso_ou_centro or CO_CURSO == @curso_ou_centro').reset_index(drop=True)
-        data = data.rename(columns={f'{var}_{new_name}':old for new_name,old in zip(VARS, NAMES)})
-
-        no_curso =  data.loc[1, 'NO_CURSO']
-        cols = ['NU_ANO_CENSO', var]
-
-        data = data[cols+NAMES]
-        data = data.groupby(by=['NU_ANO_CENSO'], as_index = False).sum(numeric_only=True)
-
-        for classe in NAMES:
-            data.loc[:,classe] = data.loc[:,classe]/data.loc[:, var]
-        data = data.melt(id_vars=['NU_ANO_CENSO', var], var_name=recorte, value_name=f'PERC_{var}')
-
-        if isinstance(curso_ou_centro, str):
-            data = data.assign(CENTRO = curso_ou_centro)
-        else:
-            data = data.assign(CO_CURSO = curso_ou_centro, NO_CURSO = no_curso)
-
-    else:
-        cols = ['NU_ANO_CENSO','CO_CURSO','NO_CURSO','CENTRO']
-        M,I,C = ['MATRICULADOS','INGRESSANTES', 'CONCLUINTES']
-
-        df1 = load_coningmat(M).loc[:,cols+[M]]
-        df2 = load_coningmat(I).loc[:,cols+[I]]
-        df3 = load_coningmat(C).loc[:,cols+[C]]
-        
-        dfs = [df1, df2, df3]
-        if curso_ou_centro == 'UFRJ':
-              for df in dfs:
-                  df['CENTRO'] = 'UFRJ'
-
-        data = pd.DataFrame()
-
-        for df in dfs:
-
-            df = df.query('CENTRO == @curso_ou_centro or CO_CURSO == @curso_ou_centro').reset_index(drop=True)
-            no_curso =  df.loc[1, 'NO_CURSO']
-            df = df.groupby(by=['NU_ANO_CENSO'], as_index = False).sum(numeric_only=True)
-            df = df.melt(id_vars = ['NU_ANO_CENSO'], value_vars = df.columns.to_list()[-1], var_name = 'ALUNOS', value_name = 'TOTAL')
-
-            if isinstance(curso_ou_centro, str):
-                df = df.assign(CENTRO = curso_ou_centro)
-            else:
-                df = df.assign(CO_CURSO = curso_ou_centro, NO_CURSO = no_curso)
-            data = pd.concat([data, df])
-
-    return data
     
-####################################################################################################### 
+########################################################################### 
 
 def grafico_recorte(recorte, curso_ou_centro, taxa, ref = None):
     '''
@@ -238,7 +160,7 @@ def grafico_recorte(recorte, curso_ou_centro, taxa, ref = None):
         else:
             df = df.loc[df.CO_CURSO == curso_ou_centro].copy()
         
-        #cores = ['OrangeRed', 'orange', 'green', 'blue', 'cyan']
+        cores = ['OrangeRed', 'orange', 'green', 'blue', 'cyan']
             
         if ref == 'TOTAL':
             nome_fim = '_'+ref
@@ -256,17 +178,17 @@ def grafico_recorte(recorte, curso_ou_centro, taxa, ref = None):
         y=alt.Y('Percentuais', scale=alt.Scale(domain = [0, 1], nice=10), title=None,
                 axis=alt.Axis(format='%')),
         
-        color=alt.Color('Taxas', title = 'Legenda')
+        color=alt.Color('Taxas', title = 'Legenda', scale=alt.Scale(range=cores))
         )+alt.Chart(df).mark_point(opacity=0.3,size=110, filled=True).encode(
             x='NU_ANO_CENSO',
             y='Percentuais',
             color=alt.Color('Taxas'))
        
         grafico = grafico.properties(width=450,height=300).configure_legend(orient='bottom').interactive()
-
+        
     return grafico,df
         
-#------------------------------------------------------------------------------------------------------#
+#############################################################################
 
 def grafico_TRAJETORIA(curso_ou_centro, indicador):
     
@@ -279,7 +201,6 @@ def grafico_TRAJETORIA(curso_ou_centro, indicador):
         else:
             dados = df.loc[df.CENTRO == curso_ou_centro].copy()
         valor_Y = f'average({indicador})'
-
     else:
         dados = df.loc[df.CO_CURSO == curso_ou_centro].copy()
         valor_Y = indicador
@@ -287,63 +208,12 @@ def grafico_TRAJETORIA(curso_ou_centro, indicador):
     grafico = alt.Chart(dados).mark_line(point=True).encode(
     x = alt.X('ANO_REFERENCIA', axis = alt.Axis(format='d'), title = 'ANO'),
     y = alt.Y(valor_Y,scale=alt.Scale(domain=[0,100], nice = 10), title = indicador),
-    color = alt.Color('ANO_INGRESSO', title = 'TURMA'),
-    tooltip = ['ANO_REFERENCIA','ANO_INGRESSO','CENTRO']
-    ).interactive()
+    color = alt.Color('ANO_INGRESSO', title = 'TURMA')
+    )
     
     return grafico
 
-#------------------------------------------------------------------------------------------------------#
-
-def grafico_coningmat_recorte(curso_ou_centro, recorte, var):
-  '''
-  Função que plota o gráfico de percentual/total de ingressantes, concluintes e matriculados por recorte.
-  '''
-
-  df = data_con_ing_mat(curso_ou_centro, recorte, var)
-
-  if recorte == 'GERAL':
-    name_y = 'TOTAL'
-    legend_y = name_y
-    name_color = 'ALUNOS'
-    format_y = 'd'
-  else:
-    name_y = f'PERC_{var}'
-    legend_y = f'% {var}'
-    name_color = recorte
-    format_y = '%'
-
-  chart_var = alt.Chart(df).mark_bar().encode(
-      x=alt.X('NU_ANO_CENSO:N', title='ANO'),
-      y=alt.Y(f'{name_y}:Q', axis=alt.Axis(format=format_y), title = legend_y),
-      color=f'{name_color}:N',
-      tooltip=[f'{name_y}:Q', f'{name_color}:N', 'NU_ANO_CENSO:N']
-      ).configure_legend(orient='bottom').interactive()
-
-  return chart_var
-
-#------------------------------------------------------------------------------------------------------#
-
-def grafico_coningmat_CENTROS(var='MATRICULADOS'):
-    '''
-    Função que plot o gráfico de totais de matriculados, ingressantes ou concluintes por centro.
-    '''
-    dvar = load_coningmat(var)
-    cols = ['NU_ANO_CENSO','CO_CURSO','NO_CURSO','CENTRO']
-    dvar = dvar.loc[:,cols+[var]]
-    dvar = dvar.groupby(by=['NU_ANO_CENSO', 'CENTRO'], as_index = False).sum(numeric_only=True)
-
-    chart_var = alt.Chart(dvar).mark_bar(cornerRadius=3).encode(
-        x=alt.X('NU_ANO_CENSO:N', axis = alt.Axis(format='d'), title='ANO'),
-        y=f'{var}:Q',
-        color='CENTRO:N',
-        tooltip=['CENTRO', var, 'NU_ANO_CENSO:N']
-        )
-
-    return chart_var
-
-#######################################################################################################
-#######################################################################################################
+#############################################################################
 
 box_taxa = ['EVASAO', 'RETENCAO', 'SUCESSO']
 
@@ -354,16 +224,14 @@ dfcursos = dfcursos.query('CO_CURSO != 116844 or NU_ANO_CENSO != 2012') #dado ru
 for t in box_taxa:
     dfcursos[t] = dfcursos[t]/100
     dfcentros[t] = dfcentros[t]/100
-
-#------------------------------------------------------------------------------------------------------#
-
+    
 txs, inds, met, faq = st.tabs(['Evasão-Rentenção-Sucesso',"Indicadores de Trajetória", 'Metodologia de Cálculo','FAQ'])
 
 with txs:
 
     df_cursos = load_cursos()
-    taxa = st.radio('SELECIONE A TAXA', box_taxa, horizontal=True)
-
+    taxa = st.radio('SELECIONE A TAXA', box_taxa)
+        
     fig1, fig2 = st.columns(2)
     
     with fig1:
@@ -388,50 +256,24 @@ with txs:
     
         # CAIXA DE SELECAO DO RECORTE
         box_recorte = CentrosRecortes.RECORTES
-        recorte_curso = st.selectbox('RECORTE', sorted(box_recorte), key='rec_curso_visivel')
+        recorte_curso = st.selectbox('RECORTE', sorted(box_recorte))
         
         # GRAFICO DO RECORTE
         if recorte_curso == 'ETNIA_TOTAL':
-            st.altair_chart(grafico_recorte(recorte_curso, curso, taxa, ref='TOTAL')[0], use_container_width=True)
+            st.altair_chart(grafico_recorte(recorte_curso, curso, taxa,ref='TOTAL')[0], use_container_width=True)
         else:
             st.altair_chart(grafico_recorte(recorte_curso, curso, taxa)[0], use_container_width=True)
-
 
     with fig2:
         centro = st.selectbox("CENTROS", sorted(CentrosRecortes.CENTROS),8)
       
-        recorte_centros = st.selectbox('RECORTE PARA OS CENTROS', sorted(box_recorte), key='rec_centro_visivel')
+        recorte = st.selectbox('RECORTE PARA OS CENTROS', sorted(box_recorte))
 
-        if recorte_centros == 'ETNIA_TOTAL':
-            st.altair_chart(grafico_recorte(recorte_centros, centro, taxa,'TOTAL')[0], use_container_width=True)
+        if recorte == 'ETNIA_TOTAL':
+            st.altair_chart(grafico_recorte(recorte, centro, taxa,'TOTAL')[0], use_container_width=True)
         else:
-            st.altair_chart(grafico_recorte(recorte_centros, centro, taxa)[0], use_container_width=True)
-
-    grf1, grf2 = st.columns(2)
-
-
-    desativa_rec_curso = recorte_curso == 'GERAL'
-    desativa_rec_centro = recorte_centros == 'GERAL'
-
-    if recorte_centros == 'GERAL':
-        desativa_sel_centro = True
-
-    with grf1:
-        totais = ['MATRICULADOS','INGRESSANTES','CONCLUINTES']
-        coningmat_curso = st.selectbox('Total de alunos do CURSO selecionado :point_down:', totais, key = 'GERAL', 
-            disabled = desativa_rec_curso)
-
-        st.markdown(f"<h4 style='text-align: center;'>{box_cursos} </h4>", unsafe_allow_html=True)
-        st.altair_chart(grafico_coningmat_recorte(curso, recorte_curso, coningmat_curso), use_container_width=True)
-
-    with grf2:
-        coningmat_centro = st.selectbox('Total de alunos do CENTRO selecionado :point_down:', totais, key = 'alunos_centros',
-            disabled = desativa_rec_centro)
-
-        st.markdown(f"<h4 style='text-align: center;'>{centro} </h4>", unsafe_allow_html=True)
-        st.altair_chart(grafico_coningmat_recorte(centro, recorte_centros, coningmat_centro), use_container_width=True)
-
-#------------------------------------------------------------------------------------------------------#
+            st.altair_chart(grafico_recorte(recorte, centro, taxa)[0], use_container_width=True)
+            
 
     # gráfico de todos os centros:
     st.write('')
@@ -474,18 +316,12 @@ with txs:
         text=alt.Text(f'average({taxa})', format='.2%')
     )
         
-    #title = 'MEDIA ANUAL DE <span style="color: OrangeRed;">'+taxa+'</span> DA UFRJ'
-    st.header('TOTAL DE ALUNOS POR CENTRO', divider='gray')
-    #g = (chart + rotulo).properties()
+    title = 'MEDIA ANUAL DE <span style="color: OrangeRed;">'+taxa+'</span>'
+
+    g = (chart + rotulo).properties()
     
-    #st.markdown(f"<h3 style='text-align: center;'>{title}</h3>", unsafe_allow_html=True)
-    #st.altair_chart(g, use_container_width=True)
-
-    coningmat = st.selectbox('Selecione',['MATRICULADOS','INGRESSANTES','CONCLUINTES'])
-
-    st.altair_chart(grafico_coningmat_CENTROS(coningmat), use_container_width=True)
-
-#------------------------------------------------------------------------------------------------------#
+    st.markdown(f"<h3 style='text-align: center;'>{title}</h3>", unsafe_allow_html=True)
+    st.altair_chart(g, use_container_width=True)
 
 with inds:
 
@@ -503,7 +339,7 @@ with inds:
     fig1, fig2 = st.columns(2)
 
     with fig1:
-        # Caixa de seleção do curso
+        # CAIXA DE SELEÇÃO DO CURSO
 
         codigos = dftrajetoria['CO_CURSO'].unique()
         cursos = [list(dftrajetoria.loc[dftrajetoria.CO_CURSO == codigo].NO_CURSO)[0] for codigo in codigos]
@@ -523,9 +359,8 @@ with inds:
         st.altair_chart(grafico_TRAJETORIA(centro, option),
                         use_container_width=True)
 
-# gráfico de todos os centros:
-#------------------------------------------------------------------------------------------------------#
-
+    # gráfico de todos os centros:
+    
     st.write('')
     st.header(f'{option} - {name_ind} por CENTRO', divider='gray')
     
@@ -561,16 +396,14 @@ with inds:
         color=alt.Color('ANO_INGRESSO', title='TURMAS')
     ).interactive().properties(
         title=alt.TitleParams(
-            text='MEDIA ANUAL '+option+' DA UFRJ',
+            text='MEDIA ANUAL '+option,
             align='center',
             anchor='middle'
         )
     )
 
     st.altair_chart(media_anual, use_container_width=True)
-
-#------------------------------------------------------------------------------------------------------#
-
+    
 with met:
     st.title("Metodolgia de Cálculo")
     st.write("---")
