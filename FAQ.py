@@ -33,3 +33,7 @@ with st.expander("Por que não temos gráficos com informações sobre alunos co
 #9
 with st.expander("Como analisar os gráficos por cotas, etnia, procedência ou sexo?"):
     st.write("Nesses gráficos, avaliamos o percentual de evasão, retenção e sucesso dentro de cada recorte. Por exemplo, um percentual de retenção de 40% na curva referente ao sexo feminino no gráfico de retenção de um curso significa que entre o total de alunas que se declaram desse sexo, 40%% se encontram retidas.")
+
+#10
+with st.expander("Por que no gráfico de etnia-total o percentual de evasão de um determinado grupo pode ser inferior ao esperado?"):
+    st.write("Na análise desse gráfico, é essencial observar o número de alunos que se declaram pertencentes a uma determinada etnia ou raça. Se esse número for muito inferior ao da etnia/raça de maior frequência, o percentual será menor em função da baixa representatividade dos alunos daquela etnia")

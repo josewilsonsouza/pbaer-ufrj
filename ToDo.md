@@ -3,16 +3,16 @@
 
 ### 05/08
 
-- [ ] Criar Resumos para a SIAC
-    - [ ] Retenção e Evasão
-    - [ ] Indicadores de Trajetórias(Recorte Longitudinal)
-    - [ ] Ferramenta que está sendo construída(Streamlit)
+- [X] Criar Resumos para a SIAC
+    - [X] Retenção e Evasão
+    - [X] Indicadores de Trajetórias(Recorte Longitudinal)
+    - [X] Ferramenta que está sendo construída(Streamlit)
 
 ### 15/08
 
 - [X] Ajustar na ferramenta (streamlit) as cores índices dos gráficos, colocando as mesmas cores para as mesmas variáveis, a fim de facilitar a comparação, entre um gráfico e outro, de quem for utilizar a ferramenta;
 - [X] Quando se olha para o recorte ETNIA X ETNIA TOTAL, repara-se que o percentual de evasão para alunos pretos, é menor do que o esperado, visto que são comparados com o total de alunos da universidade, demonstrando baixa representatividade. Nesse sentido, inserir no gráfico a informação de quantos alunos são pretos, pardos e brancos (talvez um gráfico de pizza seria melhor para visualização).
-- [ ] Fazer mais um texto para colocar na aba FAQ em que se explique o porquê da observação do item 3, em que há um gráfico para demonstrar a baixa representatividade dos alunos em relação a etnia, ressaltando que o numero de alunos autodeclarados pardos tem aumentado (reduzindo o numero de alunos pretos representados). ANTES DE INSERIR O TEXTO, envia-lo para o professor e obter o de acordo.
+- [X] Fazer mais um texto para colocar na aba FAQ em que se explique o porquê da observação do item 3, em que há um gráfico para demonstrar a baixa representatividade dos alunos em relação a etnia, ressaltando que o numero de alunos autodeclarados pardos tem aumentado (reduzindo o numero de alunos pretos representados). ANTES DE INSERIR O TEXTO, envia-lo para o professor e obter o de acordo.
 - [X]  Sobre o gráfico  MEDIA ANUAL DE EVASÃO (gráficos de barras) tentar coloca-lo para acompanhar o centro que aparece no gráfico Media de Evasão por Centro (que esta a cima dele), se não for possível, alterar o nome do gráfico para MEDIA ANUAL DE EVASÃO DA UFRJ.
 
 ### Sem prazo determinado
