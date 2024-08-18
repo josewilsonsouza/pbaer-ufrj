@@ -24,4 +24,4 @@
     - [ ] Macaé (1 engenharia englobando todos os códigos)
     - [ ] Ciências Biológicas (somam-se todos os códigos para fazer uma curva só)
     - [ ] EAD: criar uma aba para o curso EAD (ex: química EAD (colocando o somatório de todos os polos))
-- [ ] Inserir Kmeans
+- [X] Inserir Kmeans
