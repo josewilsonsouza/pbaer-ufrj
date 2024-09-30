@@ -45,7 +45,7 @@ def df_trajetoria():
     df_traj = df_traj.merge(df_centros, on = ['CO_CURSO'], how = 'left')
     df_traj = df_traj.dropna(subset=['CENTRO'])
     
-    df_traj['ANO_INGRESSO'] = 'Turma de ' +  df_traj['ANO_INGRESSO'].astype(str)
+    df_traj['ANO_INGRESSO'] = 'Turmas de ' +  df_traj['ANO_INGRESSO'].astype(str)
     
     return df_traj
 
@@ -262,7 +262,7 @@ def grafico_recorte(recorte, curso_ou_centro, taxa, ref = None):
             y='Percentuais',
             color=alt.Color('Taxas'))
        
-        grafico = grafico.properties(width=450,height=300).configure_legend(orient='bottom').interactive()
+        grafico = grafico.properties(width=450,height=400).configure_legend(orient='bottom').interactive()
 
     return grafico,df
         
@@ -364,72 +364,29 @@ with txs:
     df_cursos = load_cursos()
     taxa = st.radio('SELECIONE A TAXA', box_taxa, horizontal=True)
 
-    fig1, fig2 = st.columns(2)
     
-    with fig1:
-        
-        col1, col2 = st.columns([1,3])
-        
-        with col1:
-                    
-            select_CENTRO = st.selectbox("CENTRO", sorted(CentrosRecortes.CENTROS),8, key = 0)
-            codigos = df_cursos.query(f'CENTRO == "{select_CENTRO}"')['CO_CURSO'].unique()
-            
-            if select_CENTRO == 'UFRJ':
-                codigos = df_cursos['CO_CURSO'].unique()
-            
-            cursos = [list(df_cursos.loc[df_cursos.CO_CURSO == codigo].NO_CURSO)[0] for codigo in codigos]
-            
-        with col2:
-            
-            boxselect = [f'{n} - {c}' for c, n in zip(codigos, cursos)]
-            box_cursos = st.selectbox("CURSO", sorted(boxselect), key=2)    
-            curso = int(box_cursos.split(' ')[-1])
-    
-        # CAIXA DE SELECAO DO RECORTE
-        box_recorte = CentrosRecortes.RECORTES
-        recorte_curso = st.selectbox('RECORTE', sorted(box_recorte), key='rec_curso_visivel')
-        
-        # GRAFICO DO RECORTE
-        if recorte_curso == 'ETNIA_TOTAL':
-            st.altair_chart(grafico_recorte(recorte_curso, curso, taxa, ref='TOTAL')[0], use_container_width=True)
-        else:
-            st.altair_chart(grafico_recorte(recorte_curso, curso, taxa)[0], use_container_width=True)
+    # CAIXA DE SELECAO DO RECORTE
+    box_recorte = CentrosRecortes.RECORTES
+    centro = st.selectbox("CENTROS", sorted(CentrosRecortes.CENTROS),8)
+    recorte_centros = st.selectbox('RECORTE PARA OS CENTROS', sorted(box_recorte), key='rec_centro_visivel')
 
+    if recorte_centros == 'ETNIA_TOTAL':
+        st.altair_chart(grafico_recorte(recorte_centros, centro, taxa,'TOTAL')[0], use_container_width=True)
+    else:
+        st.altair_chart(grafico_recorte(recorte_centros, centro, taxa)[0], use_container_width=True)
 
-    with fig2:
-        centro = st.selectbox("CENTROS", sorted(CentrosRecortes.CENTROS),8)
-      
-        recorte_centros = st.selectbox('RECORTE PARA OS CENTROS', sorted(box_recorte), key='rec_centro_visivel')
-
-        if recorte_centros == 'ETNIA_TOTAL':
-            st.altair_chart(grafico_recorte(recorte_centros, centro, taxa,'TOTAL')[0], use_container_width=True)
-        else:
-            st.altair_chart(grafico_recorte(recorte_centros, centro, taxa)[0], use_container_width=True)
-
-    grf1, grf2 = st.columns(2)
-
-
-    desativa_rec_curso = recorte_curso == 'GERAL'
     desativa_rec_centro = recorte_centros == 'GERAL'
 
     if recorte_centros == 'GERAL':
         desativa_sel_centro = True
 
-    with grf1:
-        totais = ['MATRICULADOS','INGRESSANTES','CONCLUINTES']
-        coningmat_curso = st.selectbox('Total de alunos do CURSO selecionado :point_down:', totais, key = 'GERAL', 
-            disabled = desativa_rec_curso)
+    totais = ['MATRICULADOS','INGRESSANTES','CONCLUINTES']
 
-        st.markdown(f"<h4 style='text-align: center;'>{box_cursos} </h4>", unsafe_allow_html=True)
-        st.altair_chart(grafico_coningmat_recorte(curso, recorte_curso, coningmat_curso), use_container_width=True)
+    coningmat_centro = st.selectbox('Total de alunos do CENTRO selecionado :point_down:', totais, key = 'alunos_centros',
+        disabled = desativa_rec_centro)
 
-    with grf2:
-        coningmat_centro = st.selectbox('Total de alunos do CENTRO selecionado :point_down:', totais, key = 'alunos_centros',
-            disabled = desativa_rec_centro)
-
-        st.markdown(f"<h4 style='text-align: center;'>{centro} </h4>", unsafe_allow_html=True)
-        st.altair_chart(grafico_coningmat_recorte(centro, recorte_centros, coningmat_centro), use_container_width=True)
+    st.markdown(f"<h4 style='text-align: center;'>{centro} </h4>", unsafe_allow_html=True)
+    st.altair_chart(grafico_coningmat_recorte(centro, recorte_centros, coningmat_centro), use_container_width=True)
 
 #------------------------------------------------------------------------------------------------------#
 
@@ -452,7 +409,7 @@ with txs:
         x='NU_ANO_CENSO',
         y=taxa,
         color='CENTRO'
-    ).properties(width=450, height=300).interactive()
+    ).properties(width=450, height=400).interactive()
                  
     st.markdown(f"<h3 style='text-align: center;'>{txt_title}</h3>", unsafe_allow_html=True)
     st.altair_chart(centers, use_container_width=True)
@@ -494,34 +451,14 @@ with inds:
             'TADA - Taxa de Desistência Anual']
 
     dftrajetoria = df_trajetoria()
-    dftrajetoria['ANO_INGRESSO'] = dftrajetoria['ANO_INGRESSO'].str.replace('Turma', 'Turmas')
-
     options = st.selectbox('Escolha um indicador', desc)
     option = options.split(' ')[0]
     name_ind = options.split('-')[1]
 
-    fig1, fig2 = st.columns(2)
+    centro = st.selectbox("CENTRO", sorted(CentrosRecortes.CENTROS))
 
-    with fig1:
-        # Caixa de seleção do curso
-
-        codigos = dftrajetoria['CO_CURSO'].unique()
-        cursos = [list(dftrajetoria.loc[dftrajetoria.CO_CURSO == codigo].NO_CURSO)[0] for codigo in codigos]
-        boxselect = [f'{n} - {c}' for c, n in zip(codigos, cursos)]
-
-        box_cursos = st.selectbox("CURSO", sorted(boxselect))
-        curso = int(box_cursos.split(' ')[-1])
-
-        # GRAFICO Trajetoria
-        st.altair_chart(grafico_TRAJETORIA(curso, option),
-                        use_container_width=True)
-
-    with fig2:
-
-        centro = st.selectbox("CENTRO", sorted(CentrosRecortes.CENTROS))
-
-        st.altair_chart(grafico_TRAJETORIA(centro, option),
-                        use_container_width=True)
+    st.altair_chart(grafico_TRAJETORIA(centro, option),
+                    use_container_width=True)
 
 # gráfico de todos os centros:
 #------------------------------------------------------------------------------------------------------#
