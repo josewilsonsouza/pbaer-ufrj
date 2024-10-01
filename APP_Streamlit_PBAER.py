@@ -35,7 +35,7 @@ def load_data_cursos():
 @st.cache_data
 def load_cursos():
     df_cursos = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/CURSOS.csv')
-    df_cursos = df_cursos.query('CENTRO != "EAD" ')
+    # df_cursos = df_cursos.query('CENTRO != "EAD" ')
     return df_cursos
 
 @st.cache_data
@@ -68,7 +68,7 @@ class Rotulos:
   ETNIA_TOTAL = ETNIA
 
 class CentrosRecortes:
-  CENTROS = ['CCMN', 'CT', 'CCJE', 'CFCH', 'CCS', 'CLA', 'MACAE', 'CAXIAS', 'UFRJ']
+  CENTROS = ['CCMN', 'CT', 'CCJE', 'CFCH', 'CCS', 'CLA', 'MACAE', 'CAXIAS','EAD', 'UFRJ']
   RECORTES = ['PROCEDENCIA','COTA','ETNIA','SEXO','GERAL','ETNIA_TOTAL']
 
 class Coningmat:
