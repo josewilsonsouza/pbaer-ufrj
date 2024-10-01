@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 from altair_data_server import data_server
-
 #------------------------------------------------------------------------------------------------------#
 # Título do aplicativo
 dir = 'https://raw.githubusercontent.com/josewilsonsouza/PBAER_UFRJ/main/'
