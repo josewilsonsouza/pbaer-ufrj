@@ -274,6 +274,7 @@ def grafico_TRAJETORIA(curso_ou_centro, indicador):
     if isinstance(curso_ou_centro, str):
         if curso_ou_centro == 'UFRJ':
             dados = df
+            dados['CENTRO'] = 'UFRJ'
             
         else:
             dados = df.loc[df.CENTRO == curso_ou_centro].copy()
