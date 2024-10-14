@@ -249,7 +249,7 @@ def grafico_recorte(recorte, curso_ou_centro, taxa, ref = None):
         
         
         grafico = alt.Chart(df).mark_line(point=True).encode(
-        x=alt.X('NU_ANO_CENSO',scale=alt.Scale(domain=[min(df.NU_ANO_CENSO), 2023]), 
+        x=alt.X('NU_ANO_CENSO',scale=alt.Scale(domain=[min(df.NU_ANO_CENSO), 2024]), 
                 axis=alt.Axis(format='d'), title= 'ANO' ),
         
         y=alt.Y('Percentuais', scale=alt.Scale(domain = [0, 1], nice=10), title=None,
@@ -400,7 +400,7 @@ with txs:
     txt_title = 'MEDIA DE <span style="color: OrangeRed;">'+taxa+'</span> POR CENTRO'
     
     centers = alt.Chart(dfCENTRO).mark_line(point=True).encode(
-        x=alt.X('NU_ANO_CENSO', scale=alt.Scale(domain=[2010, 2023]),
+        x=alt.X('NU_ANO_CENSO', scale=alt.Scale(domain=[2010, 2024]),
                 axis=alt.Axis(format='d'), title='ANO'),
         y=alt.Y(taxa, scale=alt.Scale(domain=[0, 1], nice=10),
                 axis=alt.Axis(format='%'), title = taxa),
