@@ -39,7 +39,7 @@ def load_cursos():
 
 @st.cache_data
 def df_trajetoria():
-    df_traj = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/Indicadores_Trajetoria.csv')
+    df_traj = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/INDICADORES_TRAJETORIA_2010_2023.csv')
     df_centros = load_cursos().loc[:,['CO_CURSO','CENTRO']]
     df_traj = df_traj.merge(df_centros, on = ['CO_CURSO'], how = 'left')
     df_traj = df_traj.dropna(subset=['CENTRO'])
