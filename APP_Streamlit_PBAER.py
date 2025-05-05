@@ -67,7 +67,7 @@ class Rotulos:
   ETNIA_TOTAL = ETNIA
 
 class CentrosRecortes:
-  CENTROS = ['CCMN', 'CT', 'CCJE', 'CFCH', 'CCS', 'CLA', 'MACAE', 'CAXIAS', 'UFRJ']
+  CENTROS = ['CCMN', 'CT', 'CCJE', 'CFCH', 'CCS', 'CLA', 'MACAE', 'CAXIAS', 'ESCOLA DE COMUNICACAO','IFCS', 'UFRJ']
   RECORTES = ['PROCEDENCIA','COTA','ETNIA','SEXO','GERAL','ETNIA_TOTAL']
 
 class Coningmat:
