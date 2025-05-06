@@ -35,16 +35,17 @@ def load_data_cursos():
 def load_cursos():
     df_cursos = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/CURSOS.csv')
     df_cursos = df_cursos.query('CENTRO != "EAD" ')
+    df_cursos['CO_CURSO'] = df_cursos['CO_CURSO'].astype(int)
     return df_cursos
 
 @st.cache_data
 def df_trajetoria():
-    df_traj = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/INDICADORES_TRAJETORIA_2010_2023.csv')
+    df_traj = pd.read_csv('DADOS_ENSINO_SUPERIOR_UFRJ/INDICADORES_TRAJETORIA_2010_2023_AJUSTADO.csv')
     df_centros = load_cursos().loc[:,['CO_CURSO','CENTRO']]
     df_traj = df_traj.merge(df_centros, on = ['CO_CURSO'], how = 'left')
     df_traj = df_traj.dropna(subset=['CENTRO'])
     
-    df_traj['ANO_INGRESSO'] = 'Turmas de ' +  df_traj['ANO_INGRESSO'].astype(str)
+    df_traj['NU_ANO_INGRESSO'] = 'Turmas de ' +  df_traj['NU_ANO_INGRESSO'].astype(int).astype(str)
     
     return df_traj
 
@@ -285,10 +286,10 @@ def grafico_TRAJETORIA(curso_ou_centro, indicador):
         valor_Y = indicador
     
     grafico = alt.Chart(dados).mark_line(point=True).encode(
-    x = alt.X('ANO_REFERENCIA', axis = alt.Axis(format='d'), title = 'ANO'),
+    x = alt.X('NU_ANO_REFERENCIA', axis = alt.Axis(format='d'), title = 'ANO'),
     y = alt.Y(valor_Y,scale=alt.Scale(domain=[0,100], nice = 10), title = indicador),
-    color = alt.Color('ANO_INGRESSO', title = 'TURMA'),
-    tooltip = ['ANO_REFERENCIA','ANO_INGRESSO','CENTRO']
+    color = alt.Color('NU_ANO_INGRESSO', title = 'TURMA'),
+    tooltip = ['NU_ANO_REFERENCIA','NU_ANO_INGRESSO','CENTRO']
     ).interactive()
     
     return grafico
@@ -470,7 +471,7 @@ with inds:
     dftrajetoriaCENTRO = dftrajetoria.query('CENTRO in @CENTROS').copy()
 
     grafico_centros = alt.Chart(dftrajetoriaCENTRO).mark_line(point=True).encode(
-        x=alt.X('ANO_INGRESSO', title='TURMAS'),
+        x=alt.X('NU_ANO_INGRESSO', title='TURMAS'),
         y=alt.Y(f'average({option})', scale=alt.Scale(
             domain=[0, 100], nice=10), title='MEDIA '+option),
         color='CENTRO'
@@ -487,15 +488,15 @@ with inds:
     st.write('')
     st.header(f'{option} - {name_ind} por TURMAS', divider='gray')
     
-    turmas = dftrajetoria.ANO_INGRESSO.unique()
+    turmas = dftrajetoria.NU_ANO_INGRESSO.unique()
     select_TURMAS = st.multiselect('TURMAS',sorted(turmas),turmas)
-    df_select = dftrajetoria.query("ANO_INGRESSO in @select_TURMAS").copy()
+    df_select = dftrajetoria.query("NU_ANO_INGRESSO in @select_TURMAS").copy()
 
     media_anual = alt.Chart(df_select).mark_line(color='OrangeRed', point=True).encode(
-        x=alt.X('ANO_REFERENCIA', axis=alt.Axis(format='d'), title='ANO'),
+        x=alt.X('NU_ANO_REFERENCIA', axis=alt.Axis(format='d'), title='ANO'),
         y=alt.Y(f'average({option})', scale=alt.Scale(
             domain=[0, 100], nice=10), title='MEDIA '+option),
-        color=alt.Color('ANO_INGRESSO', title='TURMAS')
+        color=alt.Color('NU_ANO_INGRESSO', title='TURMAS')
     ).interactive().properties(
         title=alt.TitleParams(
             text='MEDIA ANUAL '+option+' DA UFRJ',
