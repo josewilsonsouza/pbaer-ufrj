@@ -10,10 +10,6 @@ with st.expander("Qual a fonte dos dados utilizados?"):
 with st.expander("Como são calculadas curvas dos centros e da UFRJ?"):
     st.write("A partir das médias ponderadas dos valores de evasão, retenção e sucesso na graduação dos diferentes cursos que compõem um centro e a UFRJ como um todo.")
 
-#4
-with st.expander("Por que os dados referentes aos cursos ABI e seus derivados não aparecem no estudo?"):
-    st.write("Os cursos ABI não têm formandos (concluintes) e os cursos derivados deles não possuem ingressantes (pelo SiSU/THE/TCE) e, portanto, não podemos aplicar as fórmulas do PROGRAD a eles. Estamos estudando alternativas para a geração dos dados desses cursos.")
-
 #5
 with st.expander("Por que nos gráficos de evasão percebemos uma queda nos valores fora do padrão em 2017?"):
     st.write("Verificamos que há um erro nos dados de alunos matriculados nas tabelas do Censo do Ensino Superior utilizadas, o que provoca essa alteração. Indicamos que esse ponto seja ignorado nas análises.")
