@@ -1,170 +1,117 @@
-## Metodologia do Cálculo Evasão, Retenção e Sucesso
+**⚠️OBS.** As categorias de um dado recorte serão chamadas de classes ou grupos. Exemplo: o recorte SEXO tem as classes/grupos MASCULINO e FEMININO.
 
-## Codificação do texto Latex
+## 📉 Evasão
+**DEFINIÇÃO (Taxa de Evasão).** Saída antecipada, antes da conclusão do ano, série ou ciclo, por desistência (independentemente do motivo) (INEP, 2017).
+Calculamos o percentual de alunos que se evadem no primeiro ano dos cursos de graduação:
 
-# Explicação da fórmula
-st.markdown(r'''
-### Fórmula para o cálculo da Evasão:
-$$ Ev_p = \left (1 - \dfrac{M_p - I_p}{M_{p-1} - C_{p-1}} \right)\times 100 $$
-- $p$ - Período (para nós, ano)
-- $M$ - Número de matriculados
-- $I$ - Número de ingressantes
-- $C$ - Número de concluintes
-''')
+$$
+\mathrm{TEV}_a = \left (1 - \dfrac{M_a - I_a}{M_{a-1} - C_{a-1}} \right)\times 100
+$$
+- $\mathrm{TEV}_a$ - Taxa de Evasão no ano $a$
+- $a$ — Ano
+- $M$ — Número de matriculados
+- $I$ — Número de ingressantes
+- $C$ — Número de concluintes
 
-st.markdown(r'''
-### Fórmula para o cálculo da Retenção:
+##### EVASAO - TOTAL: CASO ETNIA 
 
-$$ IRet_a = \dfrac{I_i - C_{a,i} - EV_i}{I_i - EV_i} \times 100 $$
+**DEFINIÇÃO (Taxa de Evasão Total).** Representa a taxa de evasão calculada considerando **o conjunto total de estudantes**, independentemente do grupo específico de etnia. Ou seja, agrega os dados de todas as categorias de etnia (como Branca, Preta, Parda etc.), fornecendo uma visão geral da evasão **dentro do recorte Étnico**, mas **sem distinguir entre os grupos**.
 
-ou, alternativamente,
+Para uma dada etnia $j$:
 
-$$ IRet_a = \left(1 - \dfrac{C_{a,i}}{I_i - EV_i} \right) \times 100 $$
+$$
+\mathrm{TEVT}_a^{(j)} = \dfrac{M_{a-1}^{(j)} - C_{a-1}^{(j)} +I_a^{(j)} - M_a^{(j)}}{M_{a-1}-C_{a-1} }
+$$
 
-onde:
+- $a$: Ano de referência da evasão.
+- $j$: Grupo ou classe pertencente ao recorte ETNIA (Branca, Preta ou Parda).
+- $M_a^{(j)}$: Número de alunos do grupo $j$ matriculados no ano $a$.
+- $C_a^{(j)}$: Número de alunos do grupo $j$ que concluíram o curso no ano $a$.
+- $I_a^{(j)}$: Número de ingressantes do grupo $j$ no ano $a$.
+- $M_a$: Total de alunos (de todos os grupos) matriculados no ano $a$.
+- $C_a$: Total de alunos (de todos os grupos) que concluíram o curso no ano $a$.
+---
 
-- $a$ - Ano base da consulta;
-- $d$ - Duração do curso;
-- $i = a - d$;
-- $I_i$ - Número de ingressantes no ano $i$;
-- $C_{a,i}$ - Número de concluintes no ano base;
-- $EV_i$ - Número de evadidos no ano $i$.
+## ⏳ Retenção
 
-##### Cálculo do número de evadidos ($EV_i$):
-Para o número de evadidos ($EV_i$) no ano $i = a-d$, estimamos fazendo
+**DEFINIÇÃO (Taxa de Retenção).** Condição intermediária de insucesso, na qual o aluno permanece na universidade após o período de integralização do seu curso (INEP, 2017).
 
-$$ EV_i = Ev_{i+1} \cdot I_i $$
+$$
+\mathrm{TRE}_a = \dfrac{I_{a-d} - C_{a,a-d} - \mathrm{EV}_{a-d}}{I_{a-d} - \mathrm{EV}_{a-d}} \times 100
+$$
 
-onde $Ev_{i+1}$ é a taxa de evasão (em %) do ano $i+1$ e $I_i$ é o número de ingressantes do ano $i$. Com isso, obtemos
+- $\mathrm{TRE}_a$: Taxa de Retenção no ano $a$
+- $a$ : Ano base da consulta
+- $d$ : Duração do curso
+- $I_{a-d}$ : Número de ingressantes no ano $a-d$
+- $C_{a,a-d}$ : Concluintes no ano base que ingressaram no ano $a-d$
+- $\mathrm{EV}_{a-d}$ : Número de evadidos do ano $a-d$
 
-$$ IRet_a = \left(1 - \dfrac{C_{a,i}}{I_i \left(1 - \frac{Ev_{i+1}}{100}\right)} \right) \times 100. $$
-''', unsafe_allow_html=True)
 
-st.markdown(r'''
-### Fórmula para o cálculo do Índice de Sucesso:
+Para o cálculo da **Taxa de Retenção**, é necessário estimar quantos estudantes que ingressaram em um determinado ano acabaram evadindo ao longo do tempo.
+Como os dados disponíveis são agregados por ano e não acompanham cada estudante individualmente ao longo do tempo (isto é, não são longitudinais), foi adotada uma **metodologia de estimação baseada em coortes**.
 
-$$ ISGr_p = \dfrac{C_{p}}{Ing_{p-d}} \times 100 $$
+##### 🧠 Hipótese Adotada
 
-Onde:
+1. Admitimos que a **taxa de evasão observada em um determinado ano** representa, em grande parte, a evasão dos estudantes que **ingressaram no ano anterior**.
+Ou, simbolicamente:
 
-- $C_{p}$: Total de alunos que concluíram o curso $i$ no ano $p$;
-- $Ing_{p-d}$: Quantidade de alunos que ingressaram no curso $i$ no ano $p-d$. $d$ é a duração do curso em anos.
-    
-''', unsafe_allow_html=True)
+$$
+\mathrm{EV}_{p-d} \approx \mathrm{TEV}_{p-d+1} \cdot I_{p-d}
+$$
 
-st.write('---')
-st.title('Outras Análises')
+✅ **A maioria das evasões ocorre nos primeiros períodos do curso**, o que torna essa aproximação razoável.
 
-st.markdown(r"""
-## Evasão
-Pelo FORPLAD:
-""")
+✅ Em **contextos com dados agregados**, essa técnica é amplamente utilizada para reconstituir trajetórias estudantis.
 
-st.latex(r'e_p = 1-\dfrac{M_p-I_p}{M_{p-1} - C_{p-1}}')
+✅ Permite **calcular indicadores por coorte**, como a retenção, mesmo sem dados individuais.
 
-st.markdown("""Isso vem do fato de que""")
+2. Assumimos $C_{a,a-d} \approx C_a$. Ou seja, assumimos que todos que concluiram o curso em $a$ ingressaram em $a-d$.
 
-st.latex(r'M_p = M_{p-1}-C_{p-1}+I_p-E_p')
+##### RETENCAO - TOTAL: CASO ETNIA
+**DEFINIÇÃO.** Para uma **classe** $j$ de um dado recorte, a **Taxa de Retenção Total** da classe $j$, $\mathrm{TERT}_a^{(j)}$, calcula a taxa de retenção  de $j$ em relação ao total de alunos. 
 
-# Texto descritivo
-st.markdown(r"""
-Onde $E_p$ é o número de evadidos no período $p$. Porém, pelos dados do INEP, são considerados apenas os alunos com matrículas iniciadas entre 1 de janeiro a 1 de julho do ano de referência. No entanto, pode ter havido ingressantes no período seguinte (.2). Assim
-""")
+$$
+\mathrm{TERT}_a^{(j)} = \dfrac{I_{a-d}^{(j)}-\mathrm{EV}_{a-d}^{(j)}-C_a^{(j)}}{I_{a-d}-\mathrm{EV}_{a-d}}
+$$
 
-# Equações em LaTeX
-st.latex(r"M_a = M_{a-1}-C_{a-1}+I_{a}^1+I_{a}^2-E_a")
-st.latex(r"I_{a}^2 - E_a = M_a - M_{a-1} + C_{a-1} - I_{a}^1")
+- $ \mathrm{TERT}_a^{(j)} $: Taxa de Retenção do grupo $j$, no ano $ a$, em relação ao total.
+- $ I_{a-d}^{(j)} $: Número de ingressantes da classe $ j $ no ano $ a-d $.
+- $ \mathrm{EV}_{a-d}^{(j)} $: Número estimado de evadidos da classe $ j $ que ingressaram no ano $ a-d $.
+- $ C_a^{(j)} $: Número de concluintes da classe $ j $ no ano $ a $.
+- $ I_{a-d} $: Total de ingressantes (de todas as classes de todos os recortes) no ano $ a-d $.
+- $ \mathrm{EV}_{a-d} $: Total estimado de evadidos (de todas as classes de todos os recortes) que ingressaram no ano $ a-d $.
 
-st.markdown(r"""
-Sabemos que:
-""")
-st.latex(r"\{ C_a \} \subseteq \{ M_a \}")
-st.latex(r"\{ I_a \} \subseteq \{ M_a \}")
-st.markdown(r"""
-Onde
-""")
-st.latex(r"I_a = I_{a}^1 + I_{a}^2")
-st.markdown(r"""
-Suponha que conheçamos $I_a$. Nesse caso, temos
-""")
-st.latex(r"E_a = M_{a-1}-C_{a-1}+I_a - M_a")
-st.markdown(r"""
-Dividindo pelo total de alunos no ano $a$ que não são ingressantes: $M_{a-1}-C_{a-1}$
-""")
-st.latex(r"\dfrac{E_a}{ M_{a-1}-C_{a-1} } = 1-\dfrac{M_a-I_a}{M_{a-1}-C_{a-1} } = e_a")
+🔍 **Interpretação:**
+Esse indicador mostra, para um grupo específico, quantos estudantes ainda permanecem ativos (estão retidos) **em relação à base total** de estudantes que deveriam estar ativos, **descontando concluintes e evadidos**.
 
-st.markdown(r"""
-O caso mais real, na verdade, deve considerar que matriculados podem desistir do curso, chamando os desistentes no ano $a$, que não são ingressantes, por $d_a$, temos
-""")
-st.latex(r"M_a = M_{a-1}-C_{a-1}+I_a - E_a - d_a \Rightarrow E_a = M_{a-1}-C_{a-1}+I_a - M_a - d_a")
-st.markdown(r"""
-Logo, deveríamos ter
-""")
-st.latex(r"e_a = 1-\dfrac{M_a-I_a}{M_{a-1}-C_{a-1}} - \dfrac{d_a}{M_{a-1} - C_{a-1} }")
+---
 
-st.markdown(r"""
-Acontece que estamos supondo
-""")
-st.latex(r"\dfrac{d_a}{M_{a-1}-C_{a-1} }\approx 0")
+## 🎓 Sucesso
 
-st.markdown(r"""
-Pensemos agora no caso das etnias. Vamos verificar o número de evadidos para certa etnia $j$. Nesse caso
-""")
-st.latex(r"E_{a}^{(j)} = M_{a-1}^{(j)} - C_{a-1}^{(j)} +I_a^{(j)} - M_a^{(j)}")
-st.markdown(r"""
-A proporção de evadidos da etnia $j$ em relação ao total de evadidos é dado então por
-""")
-st.latex(r"\dfrac{E_a^{(j)} }{E_a} = \dfrac{M_{a-1}^{(j)} - C_{a-1}^{(j)} +I_a^{(j)} - M_a^{(j)}}{M_{a-1}-C_{a-1}+I_a - M_a}")
+**DEFINIÇÃO.** É o Índice de conclusão do curso no ano $a$.
 
-st.latex(r"\dfrac{E_a^{(j)} }{E_a} = \dfrac{\dfrac{M_{a-1}^{(j)} - C_{a-1}^{(j)} +I_a^{(j)} - M_a^{(j)}}{M_{a-1}-C_{a-1} }} {1-\dfrac{M_a-I_a}{M_{a-1}-C_{a-1} } } = \dfrac{1}{e_a}\dfrac{M_{a-1}^{(j)} - C_{a-1}^{(j)} +I_a^{(j)} - M_a^{(j)}}{M_{a-1}-C_{a-1} }")
+$$
+\mathrm{TSU}_a = \dfrac{C_{a}}{I_{a-d}} \times 100
+$$
 
-st.markdown(r"""
-Chamando a razão de evadidos da etnia $j$ em relação ao total de alunos não ingressantes por $e_a^{(j)} $, então
-""")
-st.latex(r"e_a^{(j)} = \dfrac{M_{a-1}^{(j)} - C_{a-1}^{(j)} +I_a^{(j)} - M_a^{(j)}}{M_{a-1}-C_{a-1} }")
-st.markdown(r"""
-Com isso,
-""")
-st.latex(r"\dfrac{E_a^{(j)}}{E_a} = \dfrac{e_a^{(j)} }{e_a}")
+- $C_{a}$: Total de concluintes no ano $a$
+- $I_{a-d}$: Total de ingressantes no ano $a-d$
 
-st.markdown(r"""
-## Retenção
-Pelo FORPLAD:
-""")
-st.latex(r"r_a = \dfrac{I_{a-d} -C_{a,a-d}-E_{a-d} }{I_{a-d} -E_{a-d} }")
-st.markdown(r"ou,")
-st.latex(r"r_a = 1-\dfrac{C_{a, a-d }}{I_{a-d} -E_{a-d} }")
-st.markdown(r"""
-Onde $d$ é a duração do curso. $C_{a,a-d}$ refere-se aos alunos ingressantes em $a-d$ que concluíram o curso em $a$. É válido supor que $C_{a,a-d}\approx C_a$, já que não temos como saber quantos desses $C_a$ são de fato os que ingressaram em $a-d$.
+##### SUCESSO - TOTAL
 
-A ideia é que, dos alunos que ingressaram em $a-d$ e não foram evadidos, totalizando $I_{a-d}-E_{a-d}$, $C_{a}$ concluíram o curso. Logo, os restantes são os retidos,
-""")
-st.latex(r"R_a \approx I_{a-d}-E_{a-d}-C_a")
-st.markdown(r"""
-Assim, uma estimativa razoável para a taxa de retenção é
-""")
-st.latex(r"r_a = 1 - \dfrac{C_a}{I_{a-d} - E_{a-d} }")
-st.markdown(r"""
-Sabendo que 
-""")
-st.latex(r"E_{a-d} = M_{a-d-1}-C_{a-d-1}+I_{a-d} - M_{a-d}")
-st.markdown(r"""
-temos a expressão para $r_a$:
-""")
-st.latex(r"r_a = 1 - \dfrac{C_a}{C_{a-d-1} + M_{a-d} - M_{a-d-1}}")
-st.markdown(r"""
-Para uma dada etnia $j$, os retidos são
-""")
-st.latex(r"R_a^{(j)} \approx I_{a-d}^{(j)}-E_{a-d}^{(j)}-C_a^{(j)}")
-st.markdown(r"""
-Do total de retidos, a proporção daqueles que são da etnia $j$ é dada por
-""")
-st.latex(r"\dfrac{R_a^{(j)} }{R_a} \approx  \dfrac{I_{a-d}^{(j)}-E_{a-d}^{(j)}-C_a^{(j)}}{I_{a-d}-E_{a-d}-C_a} = \dfrac{\dfrac{I_{a-d}^{(j)}-E_{a-d}^{(j)}-C_a^{(j)}}{I_{a-d}-E_{a-d} }}{1-\dfrac{C_a}{I_{a-d}-E_{a-d} }}")
-st.markdown(r"""
-Seja $r_a^{(j)}$ a proporção de alunos retidos da etnia $j$ em relação ao total de alunos ingressantes não evadidos do ano $a-d$,
-""")
-st.latex(r"r_a^{(j)} = \dfrac{I_{a-d}^{(j)}-E_{a-d}^{(j)}-C_a^{(j)}}{I_{a-d}-E_{a-d}}")
-st.markdown(r"""
-Temos, portanto,
-""")
-st.latex(r"\dfrac{R_a^{(j)} }{R_a} \approx \dfrac{r_a^{(j)}}{r_a}")
+**DEFINIÇÃO.** É o Índice de conclusão da classe $j$ de um dado recorte do curso no ano $a$.
+
+$$
+\mathrm{TSUT^{(j)}}_a = \dfrac{C^{(j)}_{a}}{I_{a-d}} \times 100
+$$
+
+---
+### REFERÊNCIAS
+- FÓRUM DE PRÓ-REITORES DE PLANEJAMENTO E
+ADMINISTRAÇÃO. **Grupo de Trabalho Indicadores** – GT. In: ANAIS do
+4º FORPLAD. Ouro Preto: IFES – Instituições Federais de Ensino
+Superior, 2015. P. 197.
+
+- INEP, Diretoria de Estatísticas Educacionais. **Metodologia de Cálculo
+dos indicadores de fluxo da educação superior**. [S.l.]: INEP, Brasília, 2017.
